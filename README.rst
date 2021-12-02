@@ -20,3 +20,13 @@ A lantern is a portable case that protects light, A dark lantern is one who's li
 FHE is a way in which we can process cyphertexts without ever decrypting them. Deep learning is a category of ways we can process data using neural network abstractions, often becoming state-of-the-art in any field that holds sufficient data with which to train the neural networks. Combining the two we propose, and strive for fully-open-source/  Kerckoffian, encrypted deep learning as a service.
 
 Cypherpunks write code.
+
+Testing
+-------
+
+To test this library during development we use adjacent `x_test.go` files. Since these will span multiple subdirectories we must give got test a sub-dir wildcard.
+
+.. code-block:: bash
+  :caption: Exhaustive sub-dir testing
+
+  go test -v --cover ./...
