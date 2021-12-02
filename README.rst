@@ -24,9 +24,9 @@ Testing
 
 To test this library during development we use adjacent `x_test.go` files. Since these will span multiple subdirectories we must give got test a sub-dir wildcard.
 
-```
+``
 go test -v --cover ./...
-```
+``
 
 .. code-block:: bash
   :caption: Exhaustive sub-dir testing
