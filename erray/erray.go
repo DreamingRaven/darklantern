@@ -2,7 +2,7 @@
  * @Author: George Onoufriou <archer>
  * @Date:   2021-12-02T10:02:50+00:00
  * @Last modified by:   archer
- * @Last modified time: 2021-12-07T22:08:47+00:00
+ * @Last modified time: 2021-12-07T22:47:20+00:00
  */
 package erray
 
@@ -19,8 +19,14 @@ type eCKKS struct {
   evaluator string
 }
 
-type Erray interface {}
+func (eckks *eCKKS) Add(other *Erray) Erray {
+    return eckks
+}
 
-func NewCKKSErray () Erray {
-  return eCKKS{}
+type Erray interface {
+  Add(other *Erray) Erray
+}
+
+func NewCKKSErray() Erray {
+  return &eCKKS{}
 }
