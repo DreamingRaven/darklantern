@@ -7,26 +7,26 @@
 package erray
 
 type eCKKS struct {
-  shape []int
-  data []float64
-  state string
-  params string
-  secretKey string
-  publicKey string
-  relinKey string
-  encryptor string
-  decryptor string
-  evaluator string
+	shape     []int
+	data      []float64
+	state     string
+	params    string
+	secretKey string
+	publicKey string
+	relinKey  string
+	encryptor string
+	decryptor string
+	evaluator string
 }
 
 func (eckks *eCKKS) Add(other *Erray) Erray {
-    return eckks
+	return eckks
 }
 
 type Erray interface {
-  Add(other *Erray) Erray
+	Add(other *Erray) Erray
 }
 
 func NewCKKSErray() Erray {
-  return &eCKKS{}
+	return &eCKKS{}
 }
