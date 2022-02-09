@@ -37,8 +37,8 @@ func TestCKKSGetSetParams(t *testing.T) {
 	}
 }
 
+// test eckks getters and setters for data are working
 func TestCKKSGetSetData(t *testing.T) {
-
 	o := NewCKKSErray()
 	data := make([]float64, 64*32*3*3*3)
 	for i := range data {
@@ -47,5 +47,22 @@ func TestCKKSGetSetData(t *testing.T) {
 	o.SetData(&data)
 	if !cmp.Equal(data, *o.GetData()) {
 		t.Fatal("eckks.data has not been set properly")
+	}
+}
+
+func TestCKKSEncrypt(t *testing.T) {
+	o := NewCKKSErray()
+	params, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+	// using params to dictate number of slots
+	data := make([]float64, params.Slots())
+	for i := range data {
+		data[i] = utils.RandFloat64(-8, 8)
+	}
+
+	o.SetParams(&params)
+	o.SetData(&data)
+	err := o.Encrypt()
+	if err != nil {
+		t.Fatal(err)
 	}
 }

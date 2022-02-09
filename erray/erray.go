@@ -23,6 +23,9 @@ type Erray interface {
 	SetData(newData *[]float64) error
 	GetParams() *ckks.Parameters
 	SetParams(newParams *ckks.Parameters) error
+	// encryption operations
+	Encrypt() error
+	Decrypt() error
 }
 
 // the purposely non-exported underlying data struct that holds
@@ -87,9 +90,26 @@ func (eckks *eCKKS) SetParams(newParams *ckks.Parameters) error {
 	return nil
 }
 
-// get emcryption parameters
+// get encryption parameters
 func (eckks *eCKKS) GetParams() *ckks.Parameters {
 	return eckks.params
+}
+
+//
+// ENCRYPTION OPERATIONS
+//
+
+// Encrypt eCKKS data and generate all intermediaries
+// if they don't already exist, except encryption parameters
+func (eckks *eCKKS) Encrypt() error {
+	return errors.New("Not yet implemented encryption.")
+}
+
+// Decrypt eCKKS data using or generating intermediaries
+// except parameters and of course the keys as it will
+// just decrypt garbage without the original keys
+func (eckks *eCKKS) Decrypt() error {
+	return errors.New("Not yet implemented decryption.")
 }
 
 //
