@@ -1,3 +1,5 @@
+/* eCKKS is an abstraction of the lattigo CKKS implementation to streamline and simplify both logic and conceptual complexity. eCKKS wraps functionality like key generation in the getters and setters, so that simply requesting a resource will ensure that it exists if it is possible.*/
+
 package erray
 
 import (
