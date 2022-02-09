@@ -20,10 +20,10 @@ type eCKKS struct {
 	sk        *rlwe.SecretKey          // generated secret key based on CKKS params (SENSITIVE)
 	pk        *rlwe.PublicKey          // generated public key based on CKKS params
 	rlk       *rlwe.RelinearizationKey // generated relinearization key based on CKKS params
-	encoder   string                   // encoder instance to encode message to plaintext
-	encryptor string                   // encryptor instance of encoded polynomial
-	decryptor string                   // CKKS decryptor instance of cyphertext
-	evaluator string                   // CKKS computational circuit evaluator instance
+	encoder   *ckks.Encoder            // encoder instance to encode message to plaintext
+	encryptor *ckks.Encryptor          // encryptor instance of encoded polynomial
+	decryptor *ckks.Decryptor          // CKKS decryptor instance of cyphertext
+	evaluator *ckks.Evaluator          // CKKS computational circuit evaluator instance
 	// kgen      *rlwe.KeyGenerator       // generator for various keys (SENSITIVE)
 }
 
@@ -152,31 +152,69 @@ func (eckks *eCKKS) InitKeys() error {
 	return nil
 }
 
-// // GetEncoder if exists or attempt generation of new encoder
-// func (eckks *eCKKS) GetEncoder() (*ckks.encoder, error) {
-// 	params, err := eckks.GetParams()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if eckks.encoder == nil {
-// 		eckks.encoder = ckks.NewEncoder(params)
-// 	}
-// 	return eckks.encoder
-// }
+// GetEncoder if exists or attempt generation of new encoder
+func (eckks *eCKKS) GetEncoder() (*ckks.Encoder, error) {
+	params, err := eckks.GetParams()
+	if err != nil {
+		return nil, err
+	}
+	if eckks.encoder == nil {
+		encoder := ckks.NewEncoder(*params)
+		eckks.encoder = &encoder
+		// eckks.encoder = &(ckks.NewEncoder(*params))
+	}
+	return eckks.encoder, nil
+}
 
 // GetEncryptor if exists or attempt generation of new encryptor
-func (eckks *eCKKS) GetEncryptor() error {
-	return nil
+func (eckks *eCKKS) GetEncryptor() (*ckks.Encryptor, error) {
+	if eckks.encryptor == nil {
+		params, err := eckks.GetParams()
+		if err != nil {
+			return nil, err
+		}
+		pk, err := eckks.GetPK()
+		if err != nil {
+			return nil, err
+		}
+		encryptor := ckks.NewEncryptor(*params, pk)
+		eckks.encryptor = &encryptor
+	}
+	return eckks.encryptor, nil
 }
 
 // GetDecryptor if exists or attempt generation of new decryptor
-func (eckks *eCKKS) GetDecryptor() error {
-	return nil
+func (eckks *eCKKS) GetDecryptor() (*ckks.Decryptor, error) {
+	if eckks.decryptor == nil {
+		params, err := eckks.GetParams()
+		if err != nil {
+			return nil, err
+		}
+		sk, err := eckks.GetSK()
+		if err != nil {
+			return nil, err
+		}
+		decryptor := ckks.NewDecryptor(*params, sk)
+		eckks.decryptor = &decryptor
+	}
+	return eckks.decryptor, nil
 }
 
 // GetEvaluator if exists or attempt generation of new evaluator
-func (eckks *eCKKS) GetEvaluator() error {
-	return nil
+func (eckks *eCKKS) GetEvaluator() (*ckks.Evaluator, error) {
+	if eckks.evaluator == nil {
+		params, err := eckks.GetParams()
+		if err != nil {
+			return nil, err
+		}
+		rk, err := eckks.GetRK()
+		if err != nil {
+			return nil, err
+		}
+		evaluator := ckks.NewEvaluator(*params, rlwe.EvaluationKey{Rlk: rk})
+		eckks.evaluator = &evaluator
+	}
+	return eckks.evaluator, nil
 }
 
 // *********************
