@@ -78,8 +78,11 @@ func (eckks *eCKKS) SetParams(newParams *ckks.Parameters) error {
 }
 
 // Get existing encryption parameters only
-func (eckks *eCKKS) GetParams() *ckks.Parameters {
-	return eckks.params
+func (eckks *eCKKS) GetParams() (*ckks.Parameters, error) {
+	if eckks.params == nil {
+		return nil, errors.New("eckks.GetParams() no parameters have been provided")
+	}
+	return eckks.params, nil
 }
 
 // Get existing secret key or attempt to generate a new one
@@ -131,8 +134,10 @@ func (eckks *eCKKS) GetRK() (*rlwe.RelinearizationKey, error) {
 
 // Generate key set
 func (eckks *eCKKS) InitKeys() error {
-	fmt.Println("*************** I HAVE ATTEMPTED TO INIT KEYS ***********")
-	params := eckks.GetParams()
+	params, err := eckks.GetParams()
+	if err != nil {
+		return err
+	}
 	if params == nil {
 		return errors.New("eckks.InitKeys() has no encryption parameters to encrypt with")
 	}
@@ -147,10 +152,17 @@ func (eckks *eCKKS) InitKeys() error {
 	return nil
 }
 
-// GetEncoder if exists or attempt generation of new encoder
-func (eckks *eCKKS) GetEncoder() error {
-	return nil
-}
+// // GetEncoder if exists or attempt generation of new encoder
+// func (eckks *eCKKS) GetEncoder() (*ckks.encoder, error) {
+// 	params, err := eckks.GetParams()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if eckks.encoder == nil {
+// 		eckks.encoder = ckks.NewEncoder(params)
+// 	}
+// 	return eckks.encoder
+// }
 
 // GetEncryptor if exists or attempt generation of new encryptor
 func (eckks *eCKKS) GetEncryptor() error {

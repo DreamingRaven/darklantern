@@ -31,7 +31,11 @@ func TestCKKSGetSetParams(t *testing.T) {
 	// as they include multiple nonexported values that cmp
 	// does not compare well
 	a := fmt.Sprintf("%#v", parms)
-	b := fmt.Sprintf("%#v", *o.GetParams())
+	saved_params, err := o.GetParams()
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := fmt.Sprintf("%#v", *saved_params)
 	if !cmp.Equal(a, b, cmpopts.IgnoreUnexported()) {
 		t.Fatal("eckks.params have not been set properly")
 	}
