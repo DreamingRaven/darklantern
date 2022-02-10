@@ -1,6 +1,9 @@
 module gitlab.com/deepcypher/darklantern
 
-go 1.17
+// https://go.dev/blog/go1.18beta2
+// $ go install golang.org/dl/go1.18beta2@latest
+// $ go1.18beta2 download
+go 1.18
 
 require (
 	github.com/google/go-cmp v0.5.7

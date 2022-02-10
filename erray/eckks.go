@@ -4,6 +4,7 @@ package erray
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/ldsec/lattigo/v2/ckks"
 	"github.com/ldsec/lattigo/v2/ckks/bootstrapping"
@@ -38,6 +39,17 @@ type eCKKS struct {
 func NewCKKSErray() Erray {
 	return &eCKKS{}
 }
+
+// type LattigoCompatible interface {
+// 	float64 | complex128
+// }
+
+// Lattigo compatible slice data types for generics
+// REQUIRES go 1.18 -> https://go.dev/blog/go1.18beta2
+type LatigoCompatible interface {
+    complex128 | float64
+}
+
 
 // *******************
 // GETTERS AND SETTERS
@@ -235,8 +247,9 @@ func (eckks *eCKKS) GetEvaluator() (*ckks.Evaluator, error) {
 // 		return err
 // 	}
 // 	message := eckks.GetData()
-// 	(*encoder).EncodeNew()
-// 	plaintext := (*encoder).EncodeNew(*message, params.LogSlots())
+// 	// (*encoder).EncodeNew()
+// 	plaintext := (*encoder).EncodeNew(message, params.MaxLevel(), params.DefaultScale(), params.LogSlots())
+// 	fmt.Printf("[%T] %+v", plaintext, plaintext)
 // 	return errors.New("Not yet implemented encryption.")
 // }
 
