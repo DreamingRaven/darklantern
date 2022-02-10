@@ -14,7 +14,7 @@ import (
 // the necessary CKKS information and array like shape
 type eCKKS struct {
 	shape        []int                       // the effective shape of this Erray
-	data         *[]float64                  // the message, plaintext, or cyphertext data
+	data         interface{}                 // the message, plaintext, or cyphertext data
 	encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
 	params       *ckks.Parameters            // encoder/ encryptor parameters
 	degree       int                         // maximum polynomial degree experienced by cyphertext
@@ -45,7 +45,7 @@ func NewCKKSErray() Erray {
 
 // SetData sets message/ data into underlying eCKKS struct
 // if the data is already present do as asked but notify
-func (eckks *eCKKS) SetData(newData *[]float64) error {
+func (eckks *eCKKS) SetData(newData interface{}) error {
 	if eckks.data != nil {
 		eckks.data = newData
 		return errors.New("ckks.data already exists cannot overwrite")
@@ -55,7 +55,7 @@ func (eckks *eCKKS) SetData(newData *[]float64) error {
 }
 
 // Get existing data only
-func (eckks *eCKKS) GetData() *[]float64 {
+func (eckks *eCKKS) GetData() interface{} {
 	return eckks.data
 }
 
@@ -235,6 +235,7 @@ func (eckks *eCKKS) GetEvaluator() (*ckks.Evaluator, error) {
 // 		return err
 // 	}
 // 	message := eckks.GetData()
+// 	(*encoder).EncodeNew()
 // 	plaintext := (*encoder).EncodeNew(*message, params.LogSlots())
 // 	return errors.New("Not yet implemented encryption.")
 // }

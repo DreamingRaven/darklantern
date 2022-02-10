@@ -17,8 +17,8 @@ type Erray interface {
 	Add(other *Erray) Erray
 	Multiply(other *Erray) Erray
 	// getters and setters
-	GetData() *[]float64
-	SetData(newData *[]float64) error
+	GetData() interface{}
+	SetData(newData interface{}) error
 	GetParams() (*ckks.Parameters, error)
 	SetParams(newParams *ckks.Parameters) error
 	// encryption operations

@@ -44,12 +44,15 @@ func TestCKKSGetSetParams(t *testing.T) {
 // test eckks getters and setters for data are working
 func TestCKKSGetSetData(t *testing.T) {
 	o := NewCKKSErray()
-	data := make([]float64, 64*32*3*3*3)
+	data := make([]float64, 3*3)
 	for i := range data {
 		data[i] = utils.RandFloat64(-8, 8)
 	}
 	o.SetData(&data)
-	if !cmp.Equal(data, *o.GetData()) {
+	// https://stackoverflow.com/questions/44370277/type-is-pointer-to-interface-not-interface-confusion
+	fmt.Printf("[%T] %+v\n", o.GetData(), o.GetData())
+	fmt.Printf("[%T] %+v\n", &data, &data)
+	if !cmp.Equal(&data, o.GetData()) {
 		t.Fatal("eckks.data has not been set properly")
 	}
 }
