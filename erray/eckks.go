@@ -4,27 +4,29 @@ package erray
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/ldsec/lattigo/v2/ckks"
+	"github.com/ldsec/lattigo/v2/ckks/bootstrapping"
 	"github.com/ldsec/lattigo/v2/rlwe"
 )
 
 // the purposely non-exported underlying data struct that holds
 // the necessary CKKS information and array like shape
 type eCKKS struct {
-	shape     []int                    // the effective shape of this Erray
-	data      *[]float64               // the message, plaintext, or cyphertext data
-	encrypted bool                     // whether 'cyphertext'=1 or 'plaintext'=0
-	params    *ckks.Parameters         // encoder/ encryptor parameters
-	sk        *rlwe.SecretKey          // generated secret key based on CKKS params (SENSITIVE)
-	pk        *rlwe.PublicKey          // generated public key based on CKKS params
-	rlk       *rlwe.RelinearizationKey // generated relinearization key based on CKKS params
-	encoder   *ckks.Encoder            // encoder instance to encode message to plaintext
-	encryptor *ckks.Encryptor          // encryptor instance of encoded polynomial
-	decryptor *ckks.Decryptor          // CKKS decryptor instance of cyphertext
-	evaluator *ckks.Evaluator          // CKKS computational circuit evaluator instance
-	// kgen      *rlwe.KeyGenerator       // generator for various keys (SENSITIVE)
+	shape        []int                       // the effective shape of this Erray
+	data         *[]float64                  // the message, plaintext, or cyphertext data
+	encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
+	params       *ckks.Parameters            // encoder/ encryptor parameters
+	degree       int                         // maximum polynomial degree experienced by cyphertext
+	sk           *rlwe.SecretKey             // generated secret key based on CKKS params (SENSITIVE)
+	pk           *rlwe.PublicKey             // generated public key based on CKKS params
+	rlk          *rlwe.RelinearizationKey    // generated relinearization key based on CKKS params
+	encoder      *ckks.Encoder               // encoder instance to encode message to plaintext
+	encryptor    *ckks.Encryptor             // encryptor instance of encoded polynomial
+	decryptor    *ckks.Decryptor             // CKKS decryptor instance of cyphertext
+	evaluator    *ckks.Evaluator             // CKKS computational circuit evaluator instance
+	bootstrapper *bootstrapping.Bootstrapper // bootstrapper/ key-refresher
+	// kgen         *rlwe.KeyGenerator          // generator for various keys (SENSITIVE)
 }
 
 // *****
@@ -221,20 +223,24 @@ func (eckks *eCKKS) GetEvaluator() (*ckks.Evaluator, error) {
 // ENCRYPTION OPERATIONS
 // *********************
 
-// Encrypt eCKKS data and generate all intermediaries
-// if they don't already exist, except encryption parameters
+// // Encrypt eCKKS data and generate all intermediaries
+// // if they don't already exist, except encryption parameters
+// func (eckks *eCKKS) Encrypt() error {
+// 	params, err := eckks.GetParams()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	encoder, err := eckks.GetEncoder()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	message := eckks.GetData()
+// 	plaintext := (*encoder).EncodeNew(*message, params.LogSlots())
+// 	return errors.New("Not yet implemented encryption.")
+// }
+
 func (eckks *eCKKS) Encrypt() error {
-	// check if secret key exists, and not already encrypted.
-	//If not generate.
-	if eckks.sk == nil && eckks.data != nil {
-		kgen := ckks.NewKeyGenerator(*eckks.params)
-		sk, pk := kgen.GenKeyPair()
-		rlk := kgen.GenRelinearizationKey(sk, 2)
-		fmt.Printf("Secret Key Type: %T\n", sk)
-		fmt.Printf("Public Key Type: %T\n", pk)
-		fmt.Printf("Relin  Key Type: %T\n", rlk)
-	}
-	return errors.New("Not yet implemented encryption.")
+	return nil
 }
 
 // Decrypt eCKKS data using or generating intermediaries
