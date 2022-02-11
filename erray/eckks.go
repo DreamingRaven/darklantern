@@ -80,6 +80,17 @@ func (eckks *eCKKS[T]) GetData() *[]T {
 	return eckks.data
 }
 
+// Get cyphertext data
+func (eckks *eCKKS[T]) GetCyphertext() (*ckks.Ciphertext, error) {
+	if eckks.cyphertext == nil {
+		err := eckks.Encrypt()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return eckks.cyphertext, nil
+}
+
 // set imaginary shape of data
 func (eckks *eCKKS[T]) SetShape(newShape []int) {
 	eckks.shape = newShape
