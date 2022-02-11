@@ -4,18 +4,25 @@ package erray
 
 import (
 	"errors"
-	"fmt"
+	// "fmt"
 
 	"github.com/ldsec/lattigo/v2/ckks"
 	"github.com/ldsec/lattigo/v2/ckks/bootstrapping"
 	"github.com/ldsec/lattigo/v2/rlwe"
 )
 
+// Lattigo compatible slice data types for generics
+// REQUIRES go 1.18 -> https://go.dev/blog/go1.18beta2
+type LattigoCompatible interface {
+    ~complex128 | ~float64
+}
+
+
 // the purposely non-exported underlying data struct that holds
 // the necessary CKKS information and array like shape
-type eCKKS struct {
+type eCKKS[T LattigoCompatible] struct {
 	shape        []int                       // the effective shape of this Erray
-	data         interface{}                 // the message, plaintext, or cyphertext data
+	data         *[]T                 // the message, plaintext, or cyphertext data
 	encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
 	params       *ckks.Parameters            // encoder/ encryptor parameters
 	degree       int                         // maximum polynomial degree experienced by cyphertext
@@ -36,20 +43,21 @@ type eCKKS struct {
 
 // Erray interface factory for eCKKS base data
 // instantiates basic eCKKS struct with default or provided values
-func NewCKKSErray() Erray {
-	return &eCKKS{}
+// func NewCKKSErrayC128() Erray[complex128] {
+// 	return &eCKKS[complex128]{}
+// }
+//
+// func NewCKKSErrayF64() Erray {
+// 	return &eCKKS[float64]{}
+// }
+
+func NewCKKSErray[T LattigoCompatible]() Erray[T] {
+	return &eCKKS[T]{}
 }
 
 // type LattigoCompatible interface {
 // 	float64 | complex128
 // }
-
-// Lattigo compatible slice data types for generics
-// REQUIRES go 1.18 -> https://go.dev/blog/go1.18beta2
-type LatigoCompatible interface {
-    complex128 | float64
-}
-
 
 // *******************
 // GETTERS AND SETTERS
@@ -57,7 +65,7 @@ type LatigoCompatible interface {
 
 // SetData sets message/ data into underlying eCKKS struct
 // if the data is already present do as asked but notify
-func (eckks *eCKKS) SetData(newData interface{}) error {
+func (eckks *eCKKS[T]) SetData(newData *[]T) error {
 	if eckks.data != nil {
 		eckks.data = newData
 		return errors.New("ckks.data already exists cannot overwrite")
@@ -67,22 +75,22 @@ func (eckks *eCKKS) SetData(newData interface{}) error {
 }
 
 // Get existing data only
-func (eckks *eCKKS) GetData() interface{} {
+func (eckks *eCKKS[T]) GetData() *[]T {
 	return eckks.data
 }
 
 // set imaginary shape of data
-func (eckks *eCKKS) SetShape(newShape []int) {
+func (eckks *eCKKS[T]) SetShape(newShape []int) {
 	eckks.shape = newShape
 }
 
 // get existing imaginary shape of data only
-func (eckks *eCKKS) GetShape() []int {
+func (eckks *eCKKS[T]) GetShape() []int {
 	return eckks.shape
 }
 
 // set encryption parameters
-func (eckks *eCKKS) SetParams(newParams *ckks.Parameters) error {
+func (eckks *eCKKS[T]) SetParams(newParams *ckks.Parameters) error {
 	if eckks.params != nil {
 		eckks.params = newParams
 		return errors.New("ckks.params already exist overwriting is dangerous")
@@ -92,7 +100,7 @@ func (eckks *eCKKS) SetParams(newParams *ckks.Parameters) error {
 }
 
 // Get existing encryption parameters only
-func (eckks *eCKKS) GetParams() (*ckks.Parameters, error) {
+func (eckks *eCKKS[T]) GetParams() (*ckks.Parameters, error) {
 	if eckks.params == nil {
 		return nil, errors.New("eckks.GetParams() no parameters have been provided")
 	}
@@ -100,7 +108,7 @@ func (eckks *eCKKS) GetParams() (*ckks.Parameters, error) {
 }
 
 // Get existing secret key or attempt to generate a new one
-func (eckks *eCKKS) GetSK() (*rlwe.SecretKey, error) {
+func (eckks *eCKKS[T]) GetSK() (*rlwe.SecretKey, error) {
 	if eckks.sk == nil {
 		switch eckks.pk {
 		case nil:
@@ -116,7 +124,7 @@ func (eckks *eCKKS) GetSK() (*rlwe.SecretKey, error) {
 }
 
 // Get existing public key or attempt to generate a new one
-func (eckks *eCKKS) GetPK() (*rlwe.PublicKey, error) {
+func (eckks *eCKKS[T]) GetPK() (*rlwe.PublicKey, error) {
 	if eckks.pk == nil {
 		switch eckks.sk {
 		case nil:
@@ -132,7 +140,7 @@ func (eckks *eCKKS) GetPK() (*rlwe.PublicKey, error) {
 }
 
 // Get existing relinearisation Key or attempt to generate a new one
-func (eckks *eCKKS) GetRK() (*rlwe.RelinearizationKey, error) {
+func (eckks *eCKKS[T]) GetRK() (*rlwe.RelinearizationKey, error) {
 	if eckks.rlk == nil {
 		if eckks.pk == nil && eckks.sk == nil {
 			err := eckks.InitKeys()
@@ -147,7 +155,7 @@ func (eckks *eCKKS) GetRK() (*rlwe.RelinearizationKey, error) {
 }
 
 // Generate key set
-func (eckks *eCKKS) InitKeys() error {
+func (eckks *eCKKS[T]) InitKeys() error {
 	params, err := eckks.GetParams()
 	if err != nil {
 		return err
@@ -167,7 +175,7 @@ func (eckks *eCKKS) InitKeys() error {
 }
 
 // GetEncoder if exists or attempt generation of new encoder
-func (eckks *eCKKS) GetEncoder() (*ckks.Encoder, error) {
+func (eckks *eCKKS[T]) GetEncoder() (*ckks.Encoder, error) {
 	params, err := eckks.GetParams()
 	if err != nil {
 		return nil, err
@@ -181,7 +189,7 @@ func (eckks *eCKKS) GetEncoder() (*ckks.Encoder, error) {
 }
 
 // GetEncryptor if exists or attempt generation of new encryptor
-func (eckks *eCKKS) GetEncryptor() (*ckks.Encryptor, error) {
+func (eckks *eCKKS[T]) GetEncryptor() (*ckks.Encryptor, error) {
 	if eckks.encryptor == nil {
 		params, err := eckks.GetParams()
 		if err != nil {
@@ -198,7 +206,7 @@ func (eckks *eCKKS) GetEncryptor() (*ckks.Encryptor, error) {
 }
 
 // GetDecryptor if exists or attempt generation of new decryptor
-func (eckks *eCKKS) GetDecryptor() (*ckks.Decryptor, error) {
+func (eckks *eCKKS[T]) GetDecryptor() (*ckks.Decryptor, error) {
 	if eckks.decryptor == nil {
 		params, err := eckks.GetParams()
 		if err != nil {
@@ -215,7 +223,7 @@ func (eckks *eCKKS) GetDecryptor() (*ckks.Decryptor, error) {
 }
 
 // GetEvaluator if exists or attempt generation of new evaluator
-func (eckks *eCKKS) GetEvaluator() (*ckks.Evaluator, error) {
+func (eckks *eCKKS[T]) GetEvaluator() (*ckks.Evaluator, error) {
 	if eckks.evaluator == nil {
 		params, err := eckks.GetParams()
 		if err != nil {
@@ -237,7 +245,7 @@ func (eckks *eCKKS) GetEvaluator() (*ckks.Evaluator, error) {
 
 // // Encrypt eCKKS data and generate all intermediaries
 // // if they don't already exist, except encryption parameters
-// func (eckks *eCKKS) Encrypt() error {
+// func (eckks *eCKKS[T]) Encrypt() error {
 // 	params, err := eckks.GetParams()
 // 	if err != nil {
 // 		return err
@@ -253,14 +261,14 @@ func (eckks *eCKKS) GetEvaluator() (*ckks.Evaluator, error) {
 // 	return errors.New("Not yet implemented encryption.")
 // }
 
-func (eckks *eCKKS) Encrypt() error {
+func (eckks *eCKKS[T]) Encrypt() error {
 	return nil
 }
 
 // Decrypt eCKKS data using or generating intermediaries
 // except parameters and of course the keys as it will
 // just decrypt garbage without the original keys
-func (eckks *eCKKS) Decrypt() error {
+func (eckks *eCKKS[T]) Decrypt() error {
 	return errors.New("Not yet implemented decryption.")
 }
 
@@ -269,11 +277,11 @@ func (eckks *eCKKS) Decrypt() error {
 // ******************
 
 // Add this eCKKS array struct with another Erray
-func (eckks *eCKKS) Add(other *Erray) Erray {
+func (eckks *eCKKS[T]) Add(other *Erray[T]) Erray[T] {
 	return eckks
 }
 
 // Multiply this eCKKS array struct with another Erray
-func (eckks *eCKKS) Multiply(other *Erray) Erray {
+func (eckks *eCKKS[T]) Multiply(other *Erray[T]) Erray[T] {
 	return eckks
 }

@@ -19,12 +19,12 @@ import (
 // checking the default factory works
 // no need to check types as this is go
 func TestNewCKKSErray(t *testing.T) {
-	NewCKKSErray()
+	NewCKKSErray[float64]()
 }
 
 // check that generated structs assigns param values correctly
 func TestCKKSGetSetParams(t *testing.T) {
-	o := NewCKKSErray()
+	o := NewCKKSErray[float64]()
 	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
 	o.SetParams(&parms)
 	// converting parms to string for easier comparison
@@ -43,7 +43,7 @@ func TestCKKSGetSetParams(t *testing.T) {
 
 // test eckks getters and setters for data are working
 func TestCKKSGetSetData(t *testing.T) {
-	o := NewCKKSErray()
+	o := NewCKKSErray[float64]()
 	data := make([]float64, 3*3)
 	for i := range data {
 		data[i] = utils.RandFloat64(-8, 8)
@@ -58,7 +58,7 @@ func TestCKKSGetSetData(t *testing.T) {
 }
 
 func TestCKKSEncrypt(t *testing.T) {
-	o := NewCKKSErray()
+	o := NewCKKSErray[float64]()
 	params, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
 	// using params to dictate number of slots
 	data := make([]float64, params.Slots())

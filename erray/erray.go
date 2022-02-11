@@ -12,13 +12,13 @@ import (
 
 // Generic abstraction of what basic functions an encryptable array (Erray)
 // supports
-type Erray interface {
+type Erray[T LattigoCompatible] interface {
 	// Abelian operations
-	Add(other *Erray) Erray
-	Multiply(other *Erray) Erray
+	Add(other *Erray[T]) Erray[T]
+	Multiply(other *Erray[T]) Erray[T]
 	// getters and setters
-	GetData() interface{}
-	SetData(newData interface{}) error
+	GetData() *[]T
+	SetData(newData *[]T) error
 	GetParams() (*ckks.Parameters, error)
 	SetParams(newParams *ckks.Parameters) error
 	// encryption operations
