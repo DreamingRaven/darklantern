@@ -73,3 +73,7 @@ func TestCKKSEncrypt(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func FuzzFoo(f *testing.F) {
+
+}
