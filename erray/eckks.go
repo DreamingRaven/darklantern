@@ -22,7 +22,8 @@ type LattigoCompatible interface {
 // the necessary CKKS information and array like shape
 type eCKKS[T LattigoCompatible] struct {
 	shape        []int                       // the effective shape of this Erray
-	data         *[]T                 // the message, plaintext, or cyphertext data
+	data         *[]T                 	 // the message
+	cyphertext   *ckks.Ciphertext  		 // Encrypted cyphertext storage of data
 	encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
 	params       *ckks.Parameters            // encoder/ encryptor parameters
 	degree       int                         // maximum polynomial degree experienced by cyphertext
@@ -243,27 +244,34 @@ func (eckks *eCKKS[T]) GetEvaluator() (*ckks.Evaluator, error) {
 // ENCRYPTION OPERATIONS
 // *********************
 
-// // Encrypt eCKKS data and generate all intermediaries
-// // if they don't already exist, except encryption parameters
-// func (eckks *eCKKS[T]) Encrypt() error {
-// 	params, err := eckks.GetParams()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	encoder, err := eckks.GetEncoder()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	message := eckks.GetData()
-// 	// (*encoder).EncodeNew()
-// 	plaintext := (*encoder).EncodeNew(message, params.MaxLevel(), params.DefaultScale(), params.LogSlots())
-// 	fmt.Printf("[%T] %+v", plaintext, plaintext)
-// 	return errors.New("Not yet implemented encryption.")
-// }
-
+// Encrypt eCKKS data and generate all intermediaries
+// if they don't already exist, except encryption parameters
 func (eckks *eCKKS[T]) Encrypt() error {
+	params, err := eckks.GetParams()
+	if err != nil {
+		return err
+	}
+	encoder, err := eckks.GetEncoder()
+	if err != nil {
+		return err
+	}
+	message := eckks.GetData()
+	// (*encoder).EncodeNew()
+	plaintext := (*encoder).EncodeNew(*message, params.MaxLevel(), params.DefaultScale(), params.LogSlots())
+	encryptor, err := eckks.GetEncryptor()
+	if err != nil {
+		return err
+	}
+	cyphertext := (*encryptor).EncryptNew(plaintext)
+	// fmt.Printf("plaintext == [%T] %+v\n", plaintext, plaintext)
+	// fmt.Printf("Cyphertext == [%T] %+v\n", cyphertext, cyphertext)
+	eckks.cyphertext = cyphertext
 	return nil
 }
+
+// func (eckks *eCKKS[T]) Encrypt() error {
+// 	return nil
+// }
 
 // Decrypt eCKKS data using or generating intermediaries
 // except parameters and of course the keys as it will
