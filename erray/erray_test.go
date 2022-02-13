@@ -75,5 +75,16 @@ func TestCKKSEncrypt(t *testing.T) {
 }
 
 func FuzzFoo(f *testing.F) {
-
+	f.Add("float64")
+	f.Add("complex128")
+	f.Fuzz(func(t *testing.T, typ string) {
+		switch {
+		case typ == "float64":
+			fmt.Printf("%v\n", typ)
+		case typ == "complex128":
+			fmt.Printf("%v\n", typ)
+		default:
+			t.Errorf("\"typ=%v\" is not supported in this fuzz test \n", typ)
+		}
+	})
 }
