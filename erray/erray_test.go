@@ -75,16 +75,32 @@ func TestCKKSEncrypt(t *testing.T) {
 }
 
 func FuzzFoo(f *testing.F) {
-	f.Add("float64")
-	f.Add("complex128")
-	f.Fuzz(func(t *testing.T, typ string) {
+	f.Add("float64", -8, 8)
+	// f.Add("complex128", -8, 8)
+	f.Fuzz(func(t *testing.T, typ string, lower int, higher int) {
 		switch {
 		case typ == "float64":
 			fmt.Printf("%v\n", typ)
-		case typ == "complex128":
-			fmt.Printf("%v\n", typ)
+			data := make([]float64, 3)
+			for i := range data {
+				data[i] = utils.RandFloat64(float64(lower), float64(higher))
+			}
+		// case typ == "complex128":
+		// 	fmt.Printf("%v\n", typ)
+		// 	data := make([]complex128, 3)
+		// 	for i := range data {
+		// 		data[i] = utils.RandComplex128(complex128(lower), complex128(higher))
+		// 	}
 		default:
 			t.Errorf("\"typ=%v\" is not supported in this fuzz test \n", typ)
 		}
 	})
 }
+
+// func genTestData[T LattigoCompatible]() *[]T{
+// 	data := make([]T, params.Slots())
+// 	for i := range data {
+// 		data[i] = utils.RandFloat64(-8, 8)
+// 	}
+// 	return &data
+// }
