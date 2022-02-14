@@ -5,6 +5,7 @@ package erray
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/ldsec/lattigo/v2/ckks"
 	"github.com/ldsec/lattigo/v2/ckks/bootstrapping"
@@ -327,18 +328,21 @@ func (eckks *eCKKS[T]) Decrypt() error {
 		return err
 	}
 	padded := (*encoder).Decode((*decryptor).DecryptNew(cyphertext), params.LogSlots())
-	message := make([]complex128, size)
+	message := make([]T, size)
 	for i := range message {
-		message[i] = padded[i]
+		// message[i] = real(padded[i])
+		// fmt.Printf("%T %v\n", reflect.TypeOf(message[0]), reflect.TypeOf(message[0]))
+		// fmt.Printf("%T %v\n", reflect.TypeOf(padded[0]), reflect.TypeOf(padded[0]))
+		// fmt.Printf("%v\n", i)
+		switch {
+		case reflect.TypeOf(message[0]) == reflect.TypeOf(padded[0]):
+			message[i] = T(padded[i])
+		default:
+			message[i] = T(real(padded[i]))
+			// return errors.New("Unsupported generic T type %T", message[0])
+		}
 	}
-	// var converted *[]T
-	// if T != complex128 {
-	// 	convert := make([]T, len(x))
-	// 	for i := range message {
-	// 		convert[i] = T(message[i])
-	// 	}
-	// 	converted = &convert
-	// }
+	fmt.Printf("%T\n", padded)
 	fmt.Printf("%T\n", message)
 	fmt.Printf("%v\n", len(message))
 	return errors.New("Not yet implemented decryption.")

@@ -121,7 +121,7 @@ func FuzzECKKSParameters(f *testing.F) {
 			for i := range data {
 				data[i] = utils.RandFloat64(float64(lower), float64(higher))
 			}
-			eckks := NewCKKSErray[float64]()
+			eckks := NewCKKSErray()
 			eckks.SetParams(params)
 			eckks.SetData(&data)
 			err := eckks.Encrypt()
