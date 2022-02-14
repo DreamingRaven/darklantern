@@ -75,10 +75,10 @@ func TestCKKSEncrypt(t *testing.T) {
 }
 
 func FuzzECKKSParameters(f *testing.F) {
+	f.Add("float64", -8, 8, "PN12QP109")
+	f.Add("float64", -8, 8, "PN13QP218")
 	f.Add("float64", -8, 8, "PN14QP438")
-	f.Add("float64", -8, 8, "PN14QP438")
-	f.Add("float64", -8, 8, "PN14QP438")
-	f.Add("float64", -8, 8, "PN14QP438")
+	f.Add("float64", -8, 8, "PN15QP880")
 	// f.Add("complex128", -8, 8)
 
 	f.Fuzz(func(t *testing.T, typ string, lower int, higher int, param_name string) {
@@ -86,8 +86,26 @@ func FuzzECKKSParameters(f *testing.F) {
 		// Creating relevant parameters for encryption
 		var params *ckks.Parameters
 		switch {
+		case param_name == "PN12QP109":
+			param, err := ckks.NewParametersFromLiteral(ckks.PN12QP109)
+			params = &param
+			if err != nil {
+				t.Errorf("%v", err)
+			}
+		case param_name == "PN13QP218":
+			param, err := ckks.NewParametersFromLiteral(ckks.PN13QP218)
+			params = &param
+			if err != nil {
+				t.Errorf("%v", err)
+			}
 		case param_name == "PN14QP438":
 			param, err := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+			params = &param
+			if err != nil {
+				t.Errorf("%v", err)
+			}
+		case param_name == "PN15QP880":
+			param, err := ckks.NewParametersFromLiteral(ckks.PN15QP880)
 			params = &param
 			if err != nil {
 				t.Errorf("%v", err)
