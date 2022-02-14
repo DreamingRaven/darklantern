@@ -50,8 +50,8 @@ func TestCKKSGetSetData(t *testing.T) {
 	}
 	o.SetData(&data)
 	// https://stackoverflow.com/questions/44370277/type-is-pointer-to-interface-not-interface-confusion
-	fmt.Printf("[%T] %+v\n", o.GetData(), o.GetData())
-	fmt.Printf("[%T] %+v\n", &data, &data)
+	// fmt.Printf("[%T] %+v\n", o.GetData(), o.GetData())
+	// fmt.Printf("[%T] %+v\n", &data, &data)
 	if !cmp.Equal(&data, o.GetData()) {
 		t.Fatal("eckks.data has not been set properly")
 	}
@@ -95,12 +95,10 @@ func FuzzECKKSParameters(f *testing.F) {
 		default:
 			t.Errorf("\"%v\" is not a supported parameter name", param_name)
 		}
-		// fmt.Printf("%T %v", params, params)
 
 		// Creating relevant data for encryption
 		switch {
 		case typ == "float64":
-			fmt.Printf("%v\n", typ)
 			data := make([]float64, 3)
 			for i := range data {
 				data[i] = utils.RandFloat64(float64(lower), float64(higher))
@@ -108,8 +106,14 @@ func FuzzECKKSParameters(f *testing.F) {
 			eckks := NewCKKSErray[float64]()
 			eckks.SetParams(params)
 			eckks.SetData(&data)
-			eckks.Encrypt()
-			fmt.Printf("%#v", eckks)
+			err := eckks.Encrypt()
+			if err != nil {
+				t.Errorf("%v", err)
+			}
+			err = eckks.Decrypt()
+			if err != nil {
+				t.Errorf("%v", err)
+			}
 		// case typ == "complex128":
 		// 	fmt.Printf("%v\n", typ)
 		// 	data := make([]complex128, 3)
