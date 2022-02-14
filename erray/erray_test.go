@@ -74,10 +74,30 @@ func TestCKKSEncrypt(t *testing.T) {
 	}
 }
 
-func FuzzFoo(f *testing.F) {
-	f.Add("float64", -8, 8)
+func FuzzECKKSParameters(f *testing.F) {
+	f.Add("float64", -8, 8, "PN14QP438")
+	f.Add("float64", -8, 8, "PN14QP438")
+	f.Add("float64", -8, 8, "PN14QP438")
+	f.Add("float64", -8, 8, "PN14QP438")
 	// f.Add("complex128", -8, 8)
-	f.Fuzz(func(t *testing.T, typ string, lower int, higher int) {
+
+	f.Fuzz(func(t *testing.T, typ string, lower int, higher int, param_name string) {
+
+		// Creating relevant parameters for encryption
+		var params *ckks.Parameters
+		switch {
+		case param_name == "PN14QP438":
+			param, err := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+			params = &param
+			if err != nil {
+				t.Errorf("%v", err)
+			}
+		default:
+			t.Errorf("\"%v\" is not a supported parameter name", param_name)
+		}
+		// fmt.Printf("%T %v", params, params)
+
+		// Creating relevant data for encryption
 		switch {
 		case typ == "float64":
 			fmt.Printf("%v\n", typ)
@@ -85,6 +105,11 @@ func FuzzFoo(f *testing.F) {
 			for i := range data {
 				data[i] = utils.RandFloat64(float64(lower), float64(higher))
 			}
+			eckks := NewCKKSErray[float64]()
+			eckks.SetParams(params)
+			eckks.SetData(&data)
+			eckks.Encrypt()
+			fmt.Printf("%#v", eckks)
 		// case typ == "complex128":
 		// 	fmt.Printf("%v\n", typ)
 		// 	data := make([]complex128, 3)
