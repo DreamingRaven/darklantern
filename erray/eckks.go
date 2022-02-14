@@ -4,7 +4,7 @@ package erray
 
 import (
 	"errors"
-	// "fmt"
+	"fmt"
 
 	"github.com/ldsec/lattigo/v2/ckks"
 	"github.com/ldsec/lattigo/v2/ckks/bootstrapping"
@@ -21,7 +21,7 @@ type LattigoCompatible interface {
 // the purposely non-exported underlying data struct that holds
 // the necessary CKKS information and array like shape
 type eCKKS[T LattigoCompatible] struct {
-	shape        []int                       // the effective shape of this Erray
+	shape        *[]int                       // the effective shape of this Erray
 	data         *[]T                 	 // the message
 	cyphertext   *ckks.Ciphertext  		 // Encrypted cyphertext storage of data
 	encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
@@ -69,9 +69,11 @@ func NewCKKSErray[T LattigoCompatible]() Erray[T] {
 func (eckks *eCKKS[T]) SetData(newData *[]T) error {
 	if eckks.data != nil {
 		eckks.data = newData
+		eckks.shape = &[]int{len(*newData)}
 		return errors.New("ckks.data already exists cannot overwrite")
 	}
 	eckks.data = newData
+	eckks.shape = &[]int{len(*newData)}
 	return nil
 }
 
@@ -92,13 +94,29 @@ func (eckks *eCKKS[T]) GetCyphertext() (*ckks.Ciphertext, error) {
 }
 
 // set imaginary shape of data
-func (eckks *eCKKS[T]) SetShape(newShape []int) {
+func (eckks *eCKKS[T]) SetShape(newShape *[]int) {
 	eckks.shape = newShape
 }
 
 // get existing imaginary shape of data only
-func (eckks *eCKKS[T]) GetShape() []int {
-	return eckks.shape
+func (eckks *eCKKS[T]) GetShape() (*[]int, error) {
+	if eckks.shape == nil {
+		return nil, errors.New("eckks has not been given any desired shape data")  
+	}
+	return eckks.shape, nil
+}
+
+// Get size of message (the number of items)
+func (eckks *eCKKS[T]) GetSize() (int, error) {
+	total := 0
+	shape, err := eckks.GetShape()
+	if err != nil {
+		return -1, err
+	}
+	for i := range *shape {
+		total += (*shape)[i]
+	}
+	return total, nil
 }
 
 // set encryption parameters
@@ -288,6 +306,41 @@ func (eckks *eCKKS[T]) Encrypt() error {
 // except parameters and of course the keys as it will
 // just decrypt garbage without the original keys
 func (eckks *eCKKS[T]) Decrypt() error {
+	params, err := eckks.GetParams()
+	if err != nil {
+		return err
+	}
+	encoder, err := eckks.GetEncoder()
+	if err != nil {
+		return err
+	}
+	decryptor, err := eckks.GetDecryptor()
+	if err != nil {
+		return err
+	}
+	cyphertext, err := eckks.GetCyphertext()
+	if err != nil {
+		return err
+	}
+	size, err := eckks.GetSize()
+	if err != nil {
+		return err
+	}
+	padded := (*encoder).Decode((*decryptor).DecryptNew(cyphertext), params.LogSlots())
+	message := make([]complex128, size)
+	for i := range message {
+		message[i] = padded[i]
+	}
+	// var converted *[]T
+	// if T != complex128 {
+	// 	convert := make([]T, len(x))
+	// 	for i := range message {
+	// 		convert[i] = T(message[i])
+	// 	}
+	// 	converted = &convert
+	// }
+	fmt.Printf("%T\n", message)
+	fmt.Printf("%v\n", len(message))
 	return errors.New("Not yet implemented decryption.")
 }
 
