@@ -5,7 +5,6 @@ package erray
 import (
 	"errors"
 	"fmt"
-	"reflect"
 
 	"github.com/ldsec/lattigo/v2/ckks"
 	"github.com/ldsec/lattigo/v2/ckks/bootstrapping"
@@ -15,16 +14,15 @@ import (
 // Lattigo compatible slice data types for generics
 // REQUIRES go 1.18 -> https://go.dev/blog/go1.18beta2
 type LattigoCompatible interface {
-    ~complex128 | ~float64
+	~float64 // | ~complex128
 }
-
 
 // the purposely non-exported underlying data struct that holds
 // the necessary CKKS information and array like shape
 type eCKKS[T LattigoCompatible] struct {
-	shape        *[]int                       // the effective shape of this Erray
-	data         *[]T                 	 // the message
-	cyphertext   *ckks.Ciphertext  		 // Encrypted cyphertext storage of data
+	shape        *[]int                      // the effective shape of this Erray
+	data         *[]T                        // the message
+	cyphertext   *ckks.Ciphertext            // Encrypted cyphertext storage of data
 	encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
 	params       *ckks.Parameters            // encoder/ encryptor parameters
 	degree       int                         // maximum polynomial degree experienced by cyphertext
@@ -102,7 +100,7 @@ func (eckks *eCKKS[T]) SetShape(newShape *[]int) {
 // get existing imaginary shape of data only
 func (eckks *eCKKS[T]) GetShape() (*[]int, error) {
 	if eckks.shape == nil {
-		return nil, errors.New("eckks has not been given any desired shape data")  
+		return nil, errors.New("eckks has not been given any desired shape data")
 	}
 	return eckks.shape, nil
 }
@@ -307,6 +305,7 @@ func (eckks *eCKKS[T]) Encrypt() error {
 // except parameters and of course the keys as it will
 // just decrypt garbage without the original keys
 func (eckks *eCKKS[T]) Decrypt() error {
+	// Im really not a fan of this tedious error handling
 	params, err := eckks.GetParams()
 	if err != nil {
 		return err
@@ -330,17 +329,15 @@ func (eckks *eCKKS[T]) Decrypt() error {
 	padded := (*encoder).Decode((*decryptor).DecryptNew(cyphertext), params.LogSlots())
 	message := make([]T, size)
 	for i := range message {
-		// message[i] = real(padded[i])
-		// fmt.Printf("%T %v\n", reflect.TypeOf(message[0]), reflect.TypeOf(message[0]))
-		// fmt.Printf("%T %v\n", reflect.TypeOf(padded[0]), reflect.TypeOf(padded[0]))
-		// fmt.Printf("%v\n", i)
-		switch {
-		case reflect.TypeOf(message[0]) == reflect.TypeOf(padded[0]):
-			message[i] = T(padded[i])
-		default:
-			message[i] = T(real(padded[i]))
-			// return errors.New("Unsupported generic T type %T", message[0])
-		}
+		message[i] = T(real(padded[i]))
+
+		// switch {
+		// case reflect.TypeOf(message[0]) == reflect.TypeOf(padded[0]):
+		// 	message[i] = complex(real(padded[i]), 0)
+		// default:
+		// 	message[i] = float64(real(padded[i]))
+		// 	// return errors.New("Unsupported generic T type %T", message[0])
+		// }
 	}
 	fmt.Printf("%T\n", padded)
 	fmt.Printf("%T\n", message)
