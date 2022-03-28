@@ -339,10 +339,11 @@ func (eckks *eCKKS[T]) Decrypt() error {
 		// 	// return errors.New("Unsupported generic T type %T", message[0])
 		// }
 	}
+	(*eckks).data = &message
 	fmt.Printf("%T\n", padded)
 	fmt.Printf("%T\n", message)
 	fmt.Printf("%v\n", len(message))
-	return errors.New("Not yet implemented decryption.")
+	return nil
 }
 
 // ******************

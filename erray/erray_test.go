@@ -8,6 +8,7 @@ package erray
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -132,6 +133,16 @@ func FuzzECKKSParameters(f *testing.F) {
 			if err != nil {
 				t.Errorf("%v", err)
 			}
+			// get decrypted slice again
+			message := eckks.GetData()
+
+			similar, explination, err := RoughlyEqualSlices(&data, message, 3)
+			if err != nil {
+				t.Errorf("%v", err)
+			}
+			if similar != true {
+				t.Errorf("%v", explination)
+			}
 		// case typ == "complex128":
 		// 	fmt.Printf("%v\n", typ)
 		// 	data := make([]complex128, 3)
@@ -142,6 +153,34 @@ func FuzzECKKSParameters(f *testing.F) {
 			t.Errorf("\"typ=%v\" is not supported in this fuzz test \n", typ)
 		}
 	})
+}
+
+// RoughlyEqualSlices compares two comparable slices to a set number of decimal places for equality.
+// If the slices are comparible but do not match then false is returned with a specific explenation.
+// if the slices are comparible but match true is returned with no explenation.
+// if the slices fail to be compared, maybe they do not allow comparison to the decimal places requested,
+// then an error will be returned.
+func RoughlyEqualSlices(a, b *[]float64, dp int) (equal bool, exp string, err error) {
+
+	factor := math.Pow(10, float64(dp))
+	// check if lengths are equal first as quick confirmation
+	if len(*a) != len(*b) {
+		return false, fmt.Sprintf("length of a (%v) != b (%v)", len(*a), len(*b)), nil
+	}
+	// check each value in a ROUGHLY corresponding value in b
+	for i := 0; i < len(*a); i++ {
+		// since there is no specific way to compare to x significant figures, we use
+		// math round on blown up or shrunken numbers by a factor dependent on decimal places
+
+		m := math.Round(float64((*a)[i])*factor) / factor
+		n := math.Round(float64((*b)[i])*factor) / factor
+		if m != n {
+			return false, fmt.Sprintf("non match found at idx=%v: %v(%v) != %v(%v)",
+				i, (*a)[i], m, (*b)[i], n), nil
+		}
+	}
+	return true, "", nil
+	// return false, errors.New("Slices could not be compared")
 }
 
 // func genTestData[T LattigoCompatible]() *[]T{
