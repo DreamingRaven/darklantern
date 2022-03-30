@@ -4,7 +4,6 @@ package erray
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/ldsec/lattigo/v2/ckks"
 	"github.com/ldsec/lattigo/v2/ckks/bootstrapping"
@@ -340,9 +339,9 @@ func (eckks *eCKKS[T]) Decrypt() error {
 		// }
 	}
 	(*eckks).data = &message
-	fmt.Printf("%T\n", padded)
-	fmt.Printf("%T\n", message)
-	fmt.Printf("%v\n", len(message))
+	// fmt.Printf("%T\n", padded)
+	// fmt.Printf("%T\n", message)
+	// fmt.Printf("%v\n", len(message))
 	return nil
 }
 
@@ -383,6 +382,7 @@ func (eckks *eCKKS[T]) DeepCopy() Erray[T] {
 // ****************
 
 func (eckks *eCKKS[T]) ToJSON() {
+
 }
 
 func (eckks *eCKKS[T]) FromJSON() {

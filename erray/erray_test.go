@@ -73,6 +73,20 @@ func TestBud(t *testing.T) {
 	}
 }
 
+func TestJSON(t *testing.T) {
+	o := NewCKKSErray[float64]()
+	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+	o.SetParams(&parms)
+	data := make([]float64, 3*3)
+	for i := range data {
+		data[i] = utils.RandFloat64(-8, 8)
+	}
+	o.SetData(&data)
+	o.Encrypt()
+	o.Decrypt()
+	o.ToJSON()
+}
+
 // test eckks getters and setters for data are working
 func TestCKKSGetSetData(t *testing.T) {
 	o := NewCKKSErray[float64]()
