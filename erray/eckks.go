@@ -374,6 +374,7 @@ func (eckks *eCKKS[T]) Bud() Erray[T] {
 	return eckks
 }
 
+// DeepCopy using ToJSON and FromJSON. Returns an error if either operation fails.
 func (eckks *eCKKS[T]) DeepCopy() (Erray[T], error) {
 	j, err := eckks.ToJSON()
 	if err != nil {

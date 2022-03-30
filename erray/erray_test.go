@@ -73,6 +73,7 @@ func TestBud(t *testing.T) {
 	}
 }
 
+// check that the JSON functions interplay correctly
 func TestJSON(t *testing.T) {
 	o := NewCKKSErray[float64]()
 	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
@@ -84,7 +85,48 @@ func TestJSON(t *testing.T) {
 	o.SetData(&data)
 	o.Encrypt()
 	o.Decrypt()
-	o.ToJSON()
+	j, err := o.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	neo := NewCKKSErray[float64]()
+	neo.FromJSON(j)
+	jc, err := neo.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(j) != string(jc) {
+		t.Fatal("Original json not equal to new json.")
+	}
+}
+
+// check that deepcopy results in an independent copy of the original
+func TestDeepCopy(t *testing.T) {
+	o := NewCKKSErray[float64]()
+	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+	o.SetParams(&parms)
+	data := make([]float64, 3*3)
+	for i := range data {
+		data[i] = utils.RandFloat64(-8, 8)
+	}
+	o.SetData(&data)
+	o.Encrypt()
+	o.Decrypt()
+	n, err := o.DeepCopy()
+	if err != nil {
+		t.Fatal(err)
+	}
+	jo, err := o.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	jn, err := n.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(jo) != string(jn) {
+		t.Fatal("DeepCopy has resulted in unequal objects.")
+	}
 }
 
 // test eckks getters and setters for data are working
