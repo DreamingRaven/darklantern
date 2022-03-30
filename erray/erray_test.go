@@ -76,7 +76,7 @@ func TestBud(t *testing.T) {
 // check that the JSON functions interplay correctly
 func TestJSON(t *testing.T) {
 	o := NewCKKSErray[float64]()
-	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+	parms, _ := ckks.NewParametersFromLiteral(ckks.PN12QP109)
 	o.SetParams(&parms)
 	data := make([]float64, 3*3)
 	for i := range data {
@@ -103,7 +103,7 @@ func TestJSON(t *testing.T) {
 // check that deepcopy results in an independent copy of the original
 func TestDeepCopy(t *testing.T) {
 	o := NewCKKSErray[float64]()
-	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+	parms, _ := ckks.NewParametersFromLiteral(ckks.PN12QP109)
 	o.SetParams(&parms)
 	data := make([]float64, 3*3)
 	for i := range data {
