@@ -49,12 +49,12 @@ func TestBud(t *testing.T) {
 	a := NewCKKSErray[float64]()
 	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
 	a.SetParams(&parms)
-	orig := fmt.Sprintf("%#v", a)
-	fmt.Printf("ORIG:\n%v\n", orig)
+	// orig := fmt.Sprintf("%#v", a)
+	// fmt.Printf("ORIG:\n%v\n", orig)
 
 	b := a.Bud()
-	cloned := fmt.Sprintf("%#v", b)
-	fmt.Printf("CLONE:\n%v\n", cloned)
+	// cloned := fmt.Sprintf("%#v", b)
+	// fmt.Printf("CLONE:\n%v\n", cloned)
 
 	// check that initial budding was a success
 	if a != b {
@@ -64,10 +64,10 @@ func TestBud(t *testing.T) {
 	parmsb, _ := ckks.NewParametersFromLiteral(ckks.PN14QP411pq)
 	b.SetParams(&parmsb)
 
-	modified := fmt.Sprintf("%#v", b)
-	fmt.Printf("MODIFIED:\n%v\n", modified)
-	newOrig := fmt.Sprintf("%#v", b)
-	fmt.Printf("NewOrigi:\n%v\n", newOrig)
+	// modified := fmt.Sprintf("%#v", b)
+	// fmt.Printf("MODIFIED:\n%v\n", modified)
+	// newOrig := fmt.Sprintf("%#v", b)
+	// fmt.Printf("NewOrigi:\n%v\n", newOrig)
 	if a == b {
 		t.Fatal("Bud has modified original object.")
 	}
@@ -126,6 +126,23 @@ func TestDeepCopy(t *testing.T) {
 	}
 	if string(jo) != string(jn) {
 		t.Fatal("DeepCopy has resulted in unequal objects.")
+	}
+	// now check that the objects are distinct
+	data = make([]float64, 3*3)
+	for i := range data {
+		data[i] = utils.RandFloat64(-8, 8)
+	}
+	n.SetData(&data)
+	jo, err = o.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	jn, err = n.ToJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(jo) == string(jn) {
+		t.Fatal("DeepCopy has resulted in linked objects.")
 	}
 }
 
