@@ -24,4 +24,6 @@ type Erray[T LattigoCompatible] interface {
 	// encryption operations
 	Encrypt() error
 	Decrypt() error
+	// object reproduction
+	Bud() Erray[T]
 }

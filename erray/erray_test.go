@@ -42,6 +42,21 @@ func TestCKKSGetSetParams(t *testing.T) {
 	}
 }
 
+// TestBud properly creates independent spinoffs of the original object
+// necessary for subsequent computation in mathematical opetrations
+func TestBud(t *testing.T) {
+	// create the original object
+	a := NewCKKSErray[float64]()
+	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
+	a.SetParams(&parms)
+	orig := fmt.Sprintf("%#v", a)
+	fmt.Printf("%v\n", orig)
+
+	b := a.Bud()
+	cloned := fmt.Sprintf("%#v", b)
+	fmt.Printf("%v\n", cloned)
+}
+
 // test eckks getters and setters for data are working
 func TestCKKSGetSetData(t *testing.T) {
 	o := NewCKKSErray[float64]()

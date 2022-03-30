@@ -350,12 +350,26 @@ func (eckks *eCKKS[T]) Decrypt() error {
 // ABELIAN OPERATIONS
 // ******************
 
-// Add this eCKKS array struct with another Erray
+// Add this eCKKS array struct with another Erray outputing a
+// completely new Erray with the comparable parameters
 func (eckks *eCKKS[T]) Add(other *Erray[T]) Erray[T] {
+	eckks.Bud()
 	return eckks
 }
 
-// Multiply this eCKKS array struct with another Erray
+// Multiply this eCKKS array struct with another Erray outputing a
+// completeley new Erray with comparable parameters
 func (eckks *eCKKS[T]) Multiply(other *Erray[T]) Erray[T] {
+	return eckks
+}
+
+// *******************
+// Object Reproduction
+// *******************
+
+// Bud current object using the process of budding to replicate
+// underlying DNA of object in this case parameters and keys
+// creating a near replica that does not hold the same body of data
+func (eckks *eCKKS[T]) Bud() Erray[T] {
 	return eckks
 }
