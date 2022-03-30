@@ -3,6 +3,7 @@
 package erray
 
 import (
+	"encoding/json"
 	"errors"
 
 	"github.com/ldsec/lattigo/v2/ckks"
@@ -373,17 +374,36 @@ func (eckks *eCKKS[T]) Bud() Erray[T] {
 	return eckks
 }
 
-func (eckks *eCKKS[T]) DeepCopy() Erray[T] {
-	return eckks
+func (eckks *eCKKS[T]) DeepCopy() (Erray[T], error) {
+	j, err := eckks.ToJSON()
+	if err != nil {
+		return nil, err
+	}
+	neo := NewCKKSErray[T]()
+	err = neo.FromJSON(j)
+	if err != nil {
+		return nil, err
+	}
+	return neo, nil
 }
 
 // ****************
 // JSON Marshalling
 // ****************
 
-func (eckks *eCKKS[T]) ToJSON() {
-
+// ToJSON converts internal struct to json bytes and returns those bytes or errors
+func (eckks *eCKKS[T]) ToJSON() ([]byte, error) {
+	marshalled, err := json.Marshal(eckks)
+	if err != nil {
+		return nil, err
+	}
+	return marshalled, nil
 }
 
-func (eckks *eCKKS[T]) FromJSON() {
+func (eckks *eCKKS[T]) FromJSON(bytes []byte) error {
+	err := json.Unmarshal(bytes, eckks)
+	if err != nil {
+		return err
+	}
+	return nil
 }
