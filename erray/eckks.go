@@ -19,21 +19,21 @@ type LattigoCompatible interface {
 // the purposely non-exported underlying data struct that holds
 // the necessary CKKS information and array like shape
 type eCKKS[T LattigoCompatible] struct {
-	Shape        *[]int                      // the effective shape of this Erray
-	Data         *[]T                        // the message
-	Cyphertext   *ckks.Ciphertext            // Encrypted cyphertext storage of data
-	Encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
-	Params       *ckks.Parameters            // encoder/ encryptor parameters
-	Degree       int                         // maximum polynomial degree experienced by cyphertext
-	SK           *rlwe.SecretKey             // generated secret key based on CKKS params (SENSITIVE)
-	PK           *rlwe.PublicKey             // generated public key based on CKKS params
-	RLK          *rlwe.RelinearizationKey    // generated relinearization key based on CKKS params
+	Shape        *[]int                      `json:"shape"`       // the effective shape of this Erray
+	Data         *[]T                        `json:"data"`        // the message
+	Cyphertext   *ckks.Ciphertext            `json:"cyphertext"`  // Encrypted cyphertext storage of data
+	Encrypted    bool                        `json:"isEncrypted"` // whether 'cyphertext'=1 or 'plaintext'=0
+	Params       *ckks.Parameters            `json:"params"`      // encoder/ encryptor parameters
+	Degree       int                         `json:"degree"`      // maximum polynomial degree experienced by cyphertext
+	SK           *rlwe.SecretKey             `json:"sk"`          // generated secret key based on CKKS params (SENSITIVE)
+	PK           *rlwe.PublicKey             `json:"pk"`          // generated public key based on CKKS params
+	RLK          *rlwe.RelinearizationKey    `json:"rlk"`         // generated relinearization key based on CKKS params
 	encoder      *ckks.Encoder               // encoder instance to encode message to plaintext
 	encryptor    *ckks.Encryptor             // encryptor instance of encoded polynomial
 	decryptor    *ckks.Decryptor             // CKKS decryptor instance of cyphertext
 	evaluator    *ckks.Evaluator             // CKKS computational circuit evaluator instance
 	bootstrapper *bootstrapping.Bootstrapper // bootstrapper/ key-refresher
-	// kgen         *rlwe.KeyGenerator          // generator for various keys (SENSITIVE)
+	// kgen      *rlwe.KeyGenerator          // generator for various keys (SENSITIVE)
 }
 
 // *****
