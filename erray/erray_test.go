@@ -50,11 +50,27 @@ func TestBud(t *testing.T) {
 	parms, _ := ckks.NewParametersFromLiteral(ckks.PN14QP438)
 	a.SetParams(&parms)
 	orig := fmt.Sprintf("%#v", a)
-	fmt.Printf("%v\n", orig)
+	fmt.Printf("ORIG:\n%v\n", orig)
 
 	b := a.Bud()
 	cloned := fmt.Sprintf("%#v", b)
-	fmt.Printf("%v\n", cloned)
+	fmt.Printf("CLONE:\n%v\n", cloned)
+
+	// check that initial budding was a success
+	if a != b {
+		t.Fatal("Bud does not initial produce an equivelant object.")
+	}
+	// now check modifications on the bud compared to the original
+	parmsb, _ := ckks.NewParametersFromLiteral(ckks.PN14QP411pq)
+	b.SetParams(&parmsb)
+
+	modified := fmt.Sprintf("%#v", b)
+	fmt.Printf("MODIFIED:\n%v\n", modified)
+	newOrig := fmt.Sprintf("%#v", b)
+	fmt.Printf("NewOrigi:\n%v\n", newOrig)
+	if a == b {
+		t.Fatal("Bud has modified original object.")
+	}
 }
 
 // test eckks getters and setters for data are working

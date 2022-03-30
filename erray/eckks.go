@@ -373,3 +373,17 @@ func (eckks *eCKKS[T]) Multiply(other *Erray[T]) Erray[T] {
 func (eckks *eCKKS[T]) Bud() Erray[T] {
 	return eckks
 }
+
+func (eckks *eCKKS[T]) DeepCopy() Erray[T] {
+	return eckks
+}
+
+// ****************
+// JSON Marshalling
+// ****************
+
+func (eckks *eCKKS[T]) ToJSON() {
+}
+
+func (eckks *eCKKS[T]) FromJSON() {
+}

@@ -26,4 +26,8 @@ type Erray[T LattigoCompatible] interface {
 	Decrypt() error
 	// object reproduction
 	Bud() Erray[T]
+	DeepCopy() Erray[T]
+	// JSON marshalling
+	ToJSON()
+	FromJSON()
 }
