@@ -19,15 +19,15 @@ type LattigoCompatible interface {
 // the purposely non-exported underlying data struct that holds
 // the necessary CKKS information and array like shape
 type eCKKS[T LattigoCompatible] struct {
-	shape        *[]int                      // the effective shape of this Erray
-	data         *[]T                        // the message
-	cyphertext   *ckks.Ciphertext            // Encrypted cyphertext storage of data
-	encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
-	params       *ckks.Parameters            // encoder/ encryptor parameters
-	degree       int                         // maximum polynomial degree experienced by cyphertext
-	sk           *rlwe.SecretKey             // generated secret key based on CKKS params (SENSITIVE)
-	pk           *rlwe.PublicKey             // generated public key based on CKKS params
-	rlk          *rlwe.RelinearizationKey    // generated relinearization key based on CKKS params
+	Shape        *[]int                      // the effective shape of this Erray
+	Data         *[]T                        // the message
+	Cyphertext   *ckks.Ciphertext            // Encrypted cyphertext storage of data
+	Encrypted    bool                        // whether 'cyphertext'=1 or 'plaintext'=0
+	Params       *ckks.Parameters            // encoder/ encryptor parameters
+	Degree       int                         // maximum polynomial degree experienced by cyphertext
+	SK           *rlwe.SecretKey             // generated secret key based on CKKS params (SENSITIVE)
+	PK           *rlwe.PublicKey             // generated public key based on CKKS params
+	RLK          *rlwe.RelinearizationKey    // generated relinearization key based on CKKS params
 	encoder      *ckks.Encoder               // encoder instance to encode message to plaintext
 	encryptor    *ckks.Encryptor             // encryptor instance of encoded polynomial
 	decryptor    *ckks.Decryptor             // CKKS decryptor instance of cyphertext
@@ -65,43 +65,43 @@ func NewCKKSErray[T LattigoCompatible]() Erray[T] {
 // SetData sets message/ data into underlying eCKKS struct
 // if the data is already present do as asked but notify
 func (eckks *eCKKS[T]) SetData(newData *[]T) error {
-	if eckks.data != nil {
-		eckks.data = newData
-		eckks.shape = &[]int{len(*newData)}
+	if eckks.Data != nil {
+		eckks.Data = newData
+		eckks.Shape = &[]int{len(*newData)}
 		return errors.New("ckks.data already exists cannot overwrite")
 	}
-	eckks.data = newData
-	eckks.shape = &[]int{len(*newData)}
+	eckks.Data = newData
+	eckks.Shape = &[]int{len(*newData)}
 	return nil
 }
 
 // Get existing data only
 func (eckks *eCKKS[T]) GetData() *[]T {
-	return eckks.data
+	return eckks.Data
 }
 
 // Get cyphertext data
 func (eckks *eCKKS[T]) GetCyphertext() (*ckks.Ciphertext, error) {
-	if eckks.cyphertext == nil {
+	if eckks.Cyphertext == nil {
 		err := eckks.Encrypt()
 		if err != nil {
 			return nil, err
 		}
 	}
-	return eckks.cyphertext, nil
+	return eckks.Cyphertext, nil
 }
 
 // set imaginary shape of data
 func (eckks *eCKKS[T]) SetShape(newShape *[]int) {
-	eckks.shape = newShape
+	eckks.Shape = newShape
 }
 
 // get existing imaginary shape of data only
 func (eckks *eCKKS[T]) GetShape() (*[]int, error) {
-	if eckks.shape == nil {
+	if eckks.Shape == nil {
 		return nil, errors.New("eckks has not been given any desired shape data")
 	}
-	return eckks.shape, nil
+	return eckks.Shape, nil
 }
 
 // Get size of message (the number of items)
@@ -119,26 +119,26 @@ func (eckks *eCKKS[T]) GetSize() (int, error) {
 
 // set encryption parameters
 func (eckks *eCKKS[T]) SetParams(newParams *ckks.Parameters) error {
-	if eckks.params != nil {
-		eckks.params = newParams
+	if eckks.Params != nil {
+		eckks.Params = newParams
 		return errors.New("ckks.params already exist overwriting is dangerous")
 	}
-	eckks.params = newParams
+	eckks.Params = newParams
 	return nil
 }
 
 // Get existing encryption parameters only
 func (eckks *eCKKS[T]) GetParams() (*ckks.Parameters, error) {
-	if eckks.params == nil {
+	if eckks.Params == nil {
 		return nil, errors.New("eckks.GetParams() no parameters have been provided")
 	}
-	return eckks.params, nil
+	return eckks.Params, nil
 }
 
 // Get existing secret key or attempt to generate a new one
 func (eckks *eCKKS[T]) GetSK() (*rlwe.SecretKey, error) {
-	if eckks.sk == nil {
-		switch eckks.pk {
+	if eckks.SK == nil {
+		switch eckks.PK {
 		case nil:
 			err := eckks.InitKeys()
 			if err != nil {
@@ -148,13 +148,13 @@ func (eckks *eCKKS[T]) GetSK() (*rlwe.SecretKey, error) {
 			return nil, errors.New("SK does not exist, but other residual keys remain, aborting")
 		}
 	}
-	return eckks.sk, nil
+	return eckks.SK, nil
 }
 
 // Get existing public key or attempt to generate a new one
 func (eckks *eCKKS[T]) GetPK() (*rlwe.PublicKey, error) {
-	if eckks.pk == nil {
-		switch eckks.sk {
+	if eckks.PK == nil {
+		switch eckks.SK {
 		case nil:
 			err := eckks.InitKeys()
 			if err != nil {
@@ -164,13 +164,13 @@ func (eckks *eCKKS[T]) GetPK() (*rlwe.PublicKey, error) {
 			return nil, errors.New("eCKKS.GetPK() PK does not exist, but other residual keys remain, aborting")
 		}
 	}
-	return eckks.pk, nil
+	return eckks.PK, nil
 }
 
 // Get existing relinearisation Key or attempt to generate a new one
 func (eckks *eCKKS[T]) GetRK() (*rlwe.RelinearizationKey, error) {
-	if eckks.rlk == nil {
-		if eckks.pk == nil && eckks.sk == nil {
+	if eckks.RLK == nil {
+		if eckks.PK == nil && eckks.SK == nil {
 			err := eckks.InitKeys()
 			if err != nil {
 				return nil, err
@@ -179,7 +179,7 @@ func (eckks *eCKKS[T]) GetRK() (*rlwe.RelinearizationKey, error) {
 			return nil, errors.New("eCKKS.GetRK() relin key does not exits, but there are other residual keys, aborting")
 		}
 	}
-	return eckks.rlk, nil
+	return eckks.RLK, nil
 }
 
 // Generate key set
@@ -196,9 +196,9 @@ func (eckks *eCKKS[T]) InitKeys() error {
 	sk, pk := kgen.GenKeyPair()
 	rlk := kgen.GenRelinearizationKey(sk, 2)
 	// assign keys together
-	eckks.sk = sk
-	eckks.pk = pk
-	eckks.rlk = rlk
+	eckks.SK = sk
+	eckks.PK = pk
+	eckks.RLK = rlk
 	return nil
 }
 
@@ -292,7 +292,7 @@ func (eckks *eCKKS[T]) Encrypt() error {
 	cyphertext := (*encryptor).EncryptNew(plaintext)
 	// fmt.Printf("plaintext == [%T] %+v\n", plaintext, plaintext)
 	// fmt.Printf("Cyphertext == [%T] %+v\n", cyphertext, cyphertext)
-	eckks.cyphertext = cyphertext
+	eckks.Cyphertext = cyphertext
 	return nil
 }
 
@@ -338,7 +338,7 @@ func (eckks *eCKKS[T]) Decrypt() error {
 		// 	// return errors.New("Unsupported generic T type %T", message[0])
 		// }
 	}
-	(*eckks).data = &message
+	(*eckks).Data = &message
 	// fmt.Printf("%T\n", padded)
 	// fmt.Printf("%T\n", message)
 	// fmt.Printf("%v\n", len(message))
