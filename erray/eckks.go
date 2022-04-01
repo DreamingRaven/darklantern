@@ -19,6 +19,8 @@ type LattigoCompatible interface {
 
 // the purposely non-exported underlying data struct that holds
 // the necessary CKKS information and array like shape
+// NOTE: make sure any changes to the implementation of eCKKS is mirrored in
+// eCKKS.bud()
 type eCKKS[T LattigoCompatible] struct {
 	Shape        *[]int                      `json:"shape"`       // the effective shape of this Erray
 	Data         *[]T                        `json:"data"`        // the message
@@ -370,8 +372,30 @@ func (eckks *eCKKS[T]) Multiply(other *Erray[T]) Erray[T] {
 // Bud current object using the process of budding to replicate
 // underlying DNA of object in this case parameters and keys
 // creating a near replica that does not hold the same body of data
+// The primary use of Bud is to create alike linked copies quickly,
+// and minimising memory usage compared to DeepCopy.
 func (eckks *eCKKS[T]) Bud() Erray[T] {
-	return eckks
+	// Errays require a lot of metadata related to the cyphertext
+	// here we share the metadata so it is avaliable, but do not share
+	// the cyphertext, or plaintext and thus also its encryption state
+	// or shape.
+	neo := eCKKS[T]{
+		Shape:        nil,
+		Data:         nil,
+		Cyphertext:   nil,
+		Encrypted:    false,
+		Params:       eckks.Params,
+		Degree:       eckks.Degree,
+		SK:           eckks.SK,
+		PK:           eckks.PK,
+		RLK:          eckks.RLK,
+		encoder:      eckks.encoder,
+		encryptor:    eckks.encryptor,
+		decryptor:    eckks.decryptor,
+		evaluator:    eckks.evaluator,
+		bootstrapper: eckks.bootstrapper,
+	}
+	return &neo
 }
 
 // DeepCopy using ToJSON and FromJSON. Returns an error if either operation fails.

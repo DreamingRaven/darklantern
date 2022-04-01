@@ -57,8 +57,8 @@ func TestBud(t *testing.T) {
 	// fmt.Printf("CLONE:\n%v\n", cloned)
 
 	// check that initial budding was a success
-	if a != b {
-		t.Fatal("Bud does not initial produce an equivelant object.")
+	if a == b {
+		t.Fatal("Bud should not produce an identical copy.")
 	}
 	// now check modifications on the bud compared to the original
 	parmsb, _ := ckks.NewParametersFromLiteral(ckks.PN14QP411pq)

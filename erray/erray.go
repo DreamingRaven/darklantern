@@ -8,6 +8,7 @@ package erray
 
 import (
 	"github.com/ldsec/lattigo/v2/ckks"
+	"github.com/ldsec/lattigo/v2/rlwe"
 )
 
 // Generic abstraction of what basic functions an encryptable array (Erray)
@@ -21,6 +22,9 @@ type Erray[T LattigoCompatible] interface {
 	SetData(newData *[]T) error
 	GetParams() (*ckks.Parameters, error)
 	SetParams(newParams *ckks.Parameters) error
+	GetSK() (*rlwe.SecretKey, error)
+	GetPK() (*rlwe.PublicKey, error)
+	GetRK() (*rlwe.RelinearizationKey, error)
 	// encryption operations
 	Encrypt() error
 	Decrypt() error
