@@ -7,9 +7,9 @@
 package optimiser
 
 import (
-    "testing"
-  )
+	"testing"
+)
 
-func TestADAM (t *testing.T) {
-  t.Fatalf("ADAM incomplete")
+func TestADAM(t *testing.T) {
+	t.Fatalf("ADAM incomplete")
 }

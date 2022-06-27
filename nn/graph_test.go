@@ -7,9 +7,9 @@
 package nn
 
 import (
-    "testing"
-  )
+	"testing"
+)
 
-func TestGraph (t *testing.T) {
-  t.Fatalf("Graph incomplete")
+func TestGraph(t *testing.T) {
+	t.Fatalf("Graph incomplete")
 }

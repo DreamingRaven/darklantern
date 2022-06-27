@@ -7,9 +7,9 @@
 package node
 
 import (
-    "testing"
-  )
+	"testing"
+)
 
-func TestNode (t *testing.T) {
-  t.Fatalf("Node incomplete")
+func TestNode(t *testing.T) {
+	t.Fatalf("Node incomplete")
 }

@@ -7,9 +7,9 @@
 package activation
 
 import (
-    "testing"
-  )
+	"testing"
+)
 
-func TestRELU (t *testing.T) {
-  t.Fatalf("RELU incomplete")
+func TestRELU(t *testing.T) {
+	t.Fatalf("RELU incomplete")
 }
