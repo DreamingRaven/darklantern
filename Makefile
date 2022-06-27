@@ -11,7 +11,8 @@ style:
 
 .PHONY: test
 test:
-	go test -short $(go list ./... | grep -v /vendor/)
+	./lazy-test.sh
+	# go test $(go list ./... | grep -v /vendor/)
 
 .PHONY: clean
 clean:
