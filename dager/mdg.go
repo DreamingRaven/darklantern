@@ -15,10 +15,11 @@ type mdg struct {
 
 // AddNode adds a given node to the graph as is
 func (g *mdg) AddNode(n *Node) error {
+	exists := g.IsNode(n)
 	defer g.lock.Unlock()
 	g.lock.Lock()
 	var out error
-	if g.IsNode(n) {
+	if exists {
 		// out := errors.New(fmt.Sprintf("node: (%v, <%p>) already exists", n.name, n))
 		out = errors.New("Node already exists")
 	} else {
@@ -57,6 +58,13 @@ func (g *mdg) List() string {
 }
 
 func (g *mdg) IsNode(n *Node) bool {
+	defer g.lock.RUnlock()
+	g.lock.RLock()
+	for i := 0; i < len(g.nodes); i++ {
+		if g.nodes[i] == n {
+			return true
+		}
+	}
 	return false
 }
 
