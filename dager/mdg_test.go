@@ -122,8 +122,8 @@ func TestAdjacentManipulation(t *testing.T) {
 		t.Fatal(err)
 	}
 	if g.IsNode(&nA) == false {
-		fmt.Println(before)
-		fmt.Println(g.List())
+		fmt.Printf("before:\n%s\n", before)
+		fmt.Printf("after:\n%s\n", g.List())
 		t.Fatal("Dager has murdered a wrong node A")
 	}
 	if g.IsNode(&nB) == true {
@@ -135,6 +135,11 @@ func TestAdjacentManipulation(t *testing.T) {
 		fmt.Println(before)
 		fmt.Println(g.List())
 		t.Fatal("Dager has murdered a wrong node C")
+	}
+
+	err = g.RmNode(&nB)
+	if err == nil {
+		t.Fatal("Dager failed to catch removal of non-existant item")
 	}
 }
 
