@@ -1,6 +1,7 @@
 package dager
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -15,7 +16,10 @@ func TestNodeManipulation(t *testing.T) {
 
 	// TODO add checking that node does not already exist in graph
 	dager.AddNode(&nA)
-	dager.AddNode(&nA)
+	err := dager.AddNode(&nA)
+	if err == nil {
+		t.Fatal("Dager has failed to stop the insertion of the same node twice")
+	}
 	dager.RmNode(&nA)
 	dager.AddNode(&nB)
 	dager.RmNode(&nB)
@@ -60,4 +64,23 @@ func TestAdjacentManipulation(t *testing.T) {
 
 	g.RmNode(&nB)
 	// TODO add manipulation of neighbors when connected node is removed
+}
+
+func TestList(t *testing.T) {
+
+	g := NewMDGDager()
+
+	nA := Node{name: "A", item: "someitem"}
+	nB := Node{name: "B", item: "someitem"}
+	nC := Node{name: "C", item: "someitem"}
+
+	g.AddNode(&nA)
+	g.AddNode(&nB)
+	g.AddNode(&nC)
+
+	g.AddEdge(&nA, &nB)
+	g.AddEdge(&nB, &nC)
+
+	o := g.List()
+	fmt.Println(o)
 }
