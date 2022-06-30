@@ -90,8 +90,8 @@ func TestList(t *testing.T) {
 
 	o := g.List()
 
-	for _, line := range strings.Split(strings.TrimRight(o, "\n"), "\n") {
-		fmt.Println(line)
+	if len(strings.Split(strings.TrimRight(o, "\n"), "\n")) != 3 {
+		t.Fatal("Dager has not generated the right number of outputs for the number of nodes")
 	}
 
 	fmt.Print(o)
