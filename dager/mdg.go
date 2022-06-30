@@ -16,8 +16,7 @@ type mdg struct {
 // AddNode adds a given node to the graph as is
 // returns error if node is already present by address
 func (g *mdg) AddNode(n *Node) error {
-	exists := g.IsNode(n) // exists has its own lock
-	if exists {
+	if g.IsNode(n) {
 		return errors.New(fmt.Sprintf("node: (%v, <%p>) already exists", n.name, n))
 	}
 	defer g.lock.Unlock()
@@ -30,7 +29,7 @@ func (g *mdg) AddNode(n *Node) error {
 // returns error if either node does not already exist
 func (g *mdg) AddEdge(from, to *Node) error {
 	if !g.IsNode(from) || !g.IsNode(to) {
-		return errors.New(fmt.Sprintf("one of (%v, <%p>) (%v, <%p>) does not exist",
+		return errors.New(fmt.Sprintf("one of (%v, <%p>) (%v, <%p>) does not exist in graph",
 			from.name, from, to.name, to))
 	}
 
@@ -41,7 +40,24 @@ func (g *mdg) AddEdge(from, to *Node) error {
 }
 
 // RmNode removes a node and its associated edges
-func (g *mdg) RmNode(n *Node) error { return nil }
+func (g *mdg) RmNode(n *Node) error {
+	defer g.lock.Unlock()
+	g.lock.Lock()
+	for i := 0; i < len(g.nodes); i++ {
+		if g.nodes[i] == n {
+			if len(g.nodes) > 1 {
+				// replacing  with last element since order does not matter
+				// this way we avoid shuffling the slice
+				g.nodes[i] = g.nodes[len(g.nodes)-1]
+				g.nodes = g.nodes[:len(g.nodes)-1]
+			} else {
+				g.nodes = make([]*Node, 0)
+			}
+			return nil
+		}
+	}
+	return errors.New(fmt.Sprintf("node: (%v, <%p>) does not exist cant remove", n.name, n))
+}
 
 // RmEdge removed a directed edge between two nodes
 func (g *mdg) RmEdge(from, to *Node) error { return nil }

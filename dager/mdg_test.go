@@ -11,18 +11,45 @@ func TestNewMDGDager(t *testing.T) {
 }
 
 func TestNodeManipulation(t *testing.T) {
-	dager := NewMDGDager()
+	g := NewMDGDager()
 	nA := Node{name: "A", item: "someitem"}
 	nB := Node{name: "B", item: "someitem"}
 
-	dager.AddNode(&nA)
-	err := dager.AddNode(&nA)
+	// adding the same node twice
+	g.AddNode(&nA)
+	err := g.AddNode(&nA)
 	if err == nil {
 		t.Fatal("Dager has failed to stop the insertion of the same node twice")
 	}
-	dager.RmNode(&nA)
-	dager.AddNode(&nB)
-	dager.RmNode(&nB)
+
+	// removing what should be the only node
+	err = g.RmNode(&nA)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// adding a different node
+	err = g.AddNode(&nB)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// removing the different node twice
+	g.RmNode(&nB)
+	err = g.RmNode(&nB)
+	if err == nil {
+		t.Fatal("Dager allowed the removal of a node that was not present")
+	}
+
+	// re-adding what should be already removed nodes
+	err = g.AddNode(&nA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.AddNode(&nB)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestEdgeManipulation(t *testing.T) {
@@ -50,6 +77,7 @@ func TestEdgeManipulation(t *testing.T) {
 
 	g.RmEdge(&nA, &nB)
 	g.RmEdge(&nB, &nC)
+	// TODO check erroring if called too many times on edge removal
 	g.RmEdge(&nA, &nB)
 	g.RmEdge(&nA, &nB)
 }
@@ -69,8 +97,8 @@ func TestAdjacentManipulation(t *testing.T) {
 	g.AddEdge(&nA, &nB)
 	g.AddEdge(&nB, &nC)
 
-	g.RmNode(&nB)
 	// TODO add manipulation of neighbors when connected node is removed
+	g.RmNode(&nB)
 }
 
 func TestList(t *testing.T) {
