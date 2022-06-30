@@ -14,36 +14,41 @@ type mdg struct {
 }
 
 // AddNode adds a given node to the graph as is
+// returns error if node is already present by address
 func (g *mdg) AddNode(n *Node) error {
-	exists := g.IsNode(n)
+	exists := g.IsNode(n) // exists has its own lock
+	if exists {
+		return errors.New(fmt.Sprintf("node: (%v, <%p>) already exists", n.name, n))
+	}
 	defer g.lock.Unlock()
 	g.lock.Lock()
-	var out error
-	if exists {
-		// out := errors.New(fmt.Sprintf("node: (%v, <%p>) already exists", n.name, n))
-		out = errors.New("Node already exists")
-	} else {
-		g.nodes = append(g.nodes, n)
-	}
-	// g.lock.Unlock()
-	return out
+	g.nodes = append(g.nodes, n)
+	return nil
 }
 
 // AddEdge adds a single directed edge between two nodes
+// returns error if either node does not already exist
 func (g *mdg) AddEdge(from, to *Node) error {
+	if !g.IsNode(from) || !g.IsNode(to) {
+		return errors.New(fmt.Sprintf("one of (%v, <%p>) (%v, <%p>) does not exist",
+			from.name, from, to.name, to))
+	}
+
+	defer g.lock.Unlock()
 	g.lock.Lock()
 	g.edges[from] = append(g.edges[from], to)
-	g.lock.Unlock()
 	return nil
 }
 
 // RmNode removes a node and its associated edges
-func (g *mdg) RmNode(n *Node) {}
+func (g *mdg) RmNode(n *Node) error { return nil }
 
 // RmEdge removed a directed edge between two nodes
-func (g *mdg) RmEdge(from, to *Node) {}
+func (g *mdg) RmEdge(from, to *Node) error { return nil }
 
+// List all nodes and their forward edges line-by-line
 func (g *mdg) List() string {
+	defer g.lock.RUnlock()
 	g.lock.RLock()
 	s := ""
 	for i := 0; i < len(g.nodes); i++ {
@@ -53,10 +58,10 @@ func (g *mdg) List() string {
 		}
 		s += "]\n"
 	}
-	g.lock.RUnlock()
 	return s
 }
 
+// IsNode compare node to list of nodes to confirm if it is or is not already being tracked
 func (g *mdg) IsNode(n *Node) bool {
 	defer g.lock.RUnlock()
 	g.lock.RLock()

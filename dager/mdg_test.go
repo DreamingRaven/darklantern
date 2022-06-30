@@ -2,6 +2,7 @@ package dager
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -14,7 +15,6 @@ func TestNodeManipulation(t *testing.T) {
 	nA := Node{name: "A", item: "someitem"}
 	nB := Node{name: "B", item: "someitem"}
 
-	// TODO add checking that node does not already exist in graph
 	dager.AddNode(&nA)
 	err := dager.AddNode(&nA)
 	if err == nil {
@@ -27,9 +27,10 @@ func TestNodeManipulation(t *testing.T) {
 
 func TestEdgeManipulation(t *testing.T) {
 	g := NewMDGDager()
-	nA := Node{name: "A", item: "someitem"}
-	nB := Node{name: "B", item: "someitem"}
-	nC := Node{name: "C", item: "someitem"}
+	nA := Node{name: "A", item: "in the graph"}
+	nB := Node{name: "B", item: "in the graph"}
+	nC := Node{name: "C", item: "in the graph"}
+	nD := Node{name: "D", item: "not in the graph"}
 	g.AddNode(&nA)
 	g.AddNode(&nB)
 	g.AddNode(&nC)
@@ -38,8 +39,14 @@ func TestEdgeManipulation(t *testing.T) {
 	g.AddEdge(&nA, &nB)
 	g.AddEdge(&nA, &nB)
 	g.AddEdge(&nB, &nC)
+
 	// TODO add cycle detection
 	g.AddEdge(&nC, &nA)
+
+	err := g.AddEdge(&nC, &nD)
+	if err == nil {
+		t.Fatal("Dager has failed to prevent edge between an internal and external node")
+	}
 
 	g.RmEdge(&nA, &nB)
 	g.RmEdge(&nB, &nC)
@@ -82,5 +89,10 @@ func TestList(t *testing.T) {
 	g.AddEdge(&nB, &nC)
 
 	o := g.List()
-	fmt.Println(o)
+
+	for _, line := range strings.Split(strings.TrimRight(o, "\n"), "\n") {
+		fmt.Println(line)
+	}
+
+	fmt.Print(o)
 }

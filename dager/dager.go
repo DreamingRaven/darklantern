@@ -7,6 +7,6 @@ type Dager interface {
 	IsNode(n *Node) bool
 	AddNode(n *Node) error
 	AddEdge(from, to *Node) error
-	RmNode(n *Node)
-	RmEdge(from, to *Node)
+	RmNode(n *Node) error
+	RmEdge(from, to *Node) error
 }
