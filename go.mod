@@ -1,8 +1,5 @@
 module gitlab.com/deepcypher/darklantern
 
-// https://go.dev/blog/go1.18beta2
-// $ go install golang.org/dl/go1.18beta2@latest
-// $ go1.18beta2 download
 go 1.18
 
 require (
