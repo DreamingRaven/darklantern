@@ -45,6 +45,7 @@ func (g *mdg) RmNode(n *Node) error {
 	g.lock.Lock()
 	for i := 0; i < len(g.nodes); i++ {
 		if g.nodes[i] == n {
+			// TODO: add removal of connected edges as well
 			if len(g.nodes) > 1 {
 				// replacing  with last element since order does not matter
 				// this way we avoid shuffling the slice
@@ -60,7 +61,27 @@ func (g *mdg) RmNode(n *Node) error {
 }
 
 // RmEdge removed a directed edge between two nodes
-func (g *mdg) RmEdge(from, to *Node) error { return nil }
+func (g *mdg) RmEdge(from, to *Node) error {
+	if !g.IsNode(from) || !g.IsNode(to) {
+		return errors.New(fmt.Sprintf("one of (%v, <%p>) (%v, <%p>) does not exist in graph",
+			from.name, from, to.name, to))
+	}
+	defer g.lock.Unlock()
+	g.lock.Lock()
+	for i := 0; i < len(g.edges[from]); i++ {
+		if g.edges[from][i] == to {
+			if len(g.edges[from]) > 1 {
+				g.edges[from][i] = g.edges[from][len(g.edges[from])-1]
+				g.edges[from] = g.edges[from][:len(g.edges[from])-1]
+			} else {
+				g.edges[from] = make([]*Node, 0)
+			}
+			return nil
+		}
+	}
+	return errors.New(fmt.Sprintf("could not find edge (%v, <%p>)->(%v, <%p>)",
+		from.name, from, to.name, to))
+}
 
 // List all nodes and their forward edges line-by-line
 func (g *mdg) List() string {

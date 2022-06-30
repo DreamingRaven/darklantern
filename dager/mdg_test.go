@@ -1,7 +1,6 @@
 package dager
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -58,28 +57,47 @@ func TestEdgeManipulation(t *testing.T) {
 	nB := Node{name: "B", item: "in the graph"}
 	nC := Node{name: "C", item: "in the graph"}
 	nD := Node{name: "D", item: "not in the graph"}
+
 	g.AddNode(&nA)
 	g.AddNode(&nB)
 	g.AddNode(&nC)
 
-	g.AddEdge(&nA, &nB)
-	g.AddEdge(&nA, &nB)
-	g.AddEdge(&nA, &nB)
-	g.AddEdge(&nB, &nC)
+	// add some basic edges
+	err := g.AddEdge(&nA, &nB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.AddEdge(&nB, &nC)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// TODO add cycle detection
-	g.AddEdge(&nC, &nA)
+	err = g.AddEdge(&nC, &nA)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	err := g.AddEdge(&nC, &nD)
+	err = g.AddEdge(&nC, &nD)
 	if err == nil {
 		t.Fatal("Dager has failed to prevent edge between an internal and external node")
 	}
 
-	g.RmEdge(&nA, &nB)
-	g.RmEdge(&nB, &nC)
-	// TODO check erroring if called too many times on edge removal
-	g.RmEdge(&nA, &nB)
-	g.RmEdge(&nA, &nB)
+	// removing all edges then trying to remove more
+	err = g.RmEdge(&nA, &nB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.RmEdge(&nB, &nC)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.RmEdge(&nA, &nB)
+	if err == nil {
+		t.Fatal("Dager failed to error when removing a non existant edge")
+	}
+
+	// fmt.Println(g.List())
 }
 
 func TestAdjacentManipulation(t *testing.T) {
@@ -122,5 +140,6 @@ func TestList(t *testing.T) {
 		t.Fatal("Dager has not generated the right number of outputs for the number of nodes")
 	}
 
-	fmt.Print(o)
+	// fmt.Print(o)
+	// fmt.Println(g.List())
 }
