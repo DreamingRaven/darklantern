@@ -1,6 +1,7 @@
 package dager
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -115,8 +116,26 @@ func TestAdjacentManipulation(t *testing.T) {
 	g.AddEdge(&nA, &nB)
 	g.AddEdge(&nB, &nC)
 
-	// TODO add manipulation of neighbors when connected node is removed
-	g.RmNode(&nB)
+	before := g.List()
+	err := g.RmNode(&nB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g.IsNode(&nA) == false {
+		fmt.Println(before)
+		fmt.Println(g.List())
+		t.Fatal("Dager has murdered a wrong node A")
+	}
+	if g.IsNode(&nB) == true {
+		fmt.Println(before)
+		fmt.Println(g.List())
+		t.Fatal("Dager has failed to eliminate the target B")
+	}
+	if g.IsNode(&nC) == false {
+		fmt.Println(before)
+		fmt.Println(g.List())
+		t.Fatal("Dager has murdered a wrong node C")
+	}
 }
 
 func TestList(t *testing.T) {

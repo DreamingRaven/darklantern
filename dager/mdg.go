@@ -45,7 +45,23 @@ func (g *mdg) RmNode(n *Node) error {
 	g.lock.Lock()
 	for i := 0; i < len(g.nodes); i++ {
 		if g.nodes[i] == n {
-			// TODO: add removal of connected edges as well
+			// deletes all forward edges
+			delete(g.edges, n)
+			// deletes all backward / referencing edges
+			for k, v := range g.edges {
+				for j := 0; j < len(v); i++ {
+					if v[j] == n {
+						if len(v) > 1 {
+							v[j] = v[len(v)-1]
+							v = v[:len(v)-1]
+						} else {
+							v = make([]*Node, 0)
+						}
+					}
+				}
+				g.edges[k] = v
+			}
+			// remove the now orphan node itself
 			if len(g.nodes) > 1 {
 				// replacing  with last element since order does not matter
 				// this way we avoid shuffling the slice
