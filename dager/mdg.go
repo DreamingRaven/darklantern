@@ -19,8 +19,8 @@ func (g *mdg) AddNode(n *Node) error {
 	if g.IsNode(n) {
 		return errors.New(fmt.Sprintf("node: (%v, <%p>) already exists", n.name, n))
 	}
-	defer g.lock.Unlock()
 	g.lock.Lock()
+	defer g.lock.Unlock()
 	g.nodes = append(g.nodes, n)
 	return nil
 }
@@ -33,16 +33,16 @@ func (g *mdg) AddEdge(from, to *Node) error {
 			from.name, from, to.name, to))
 	}
 
-	defer g.lock.Unlock()
 	g.lock.Lock()
+	defer g.lock.Unlock()
 	g.edges[from] = append(g.edges[from], to)
 	return nil
 }
 
 // RmNode removes a node and its associated edges
 func (g *mdg) RmNode(n *Node) error {
-	defer g.lock.Unlock()
 	g.lock.Lock()
+	defer g.lock.Unlock()
 	// for each node
 	for i := 0; i < len(g.nodes); i++ {
 		// search this nodes edges for matches to target
@@ -86,8 +86,8 @@ func (g *mdg) RmEdge(from, to *Node) error {
 		return errors.New(fmt.Sprintf("one of (%v, <%p>) (%v, <%p>) does not exist in graph",
 			from.name, from, to.name, to))
 	}
-	defer g.lock.Unlock()
 	g.lock.Lock()
+	defer g.lock.Unlock()
 	for i := 0; i < len(g.edges[from]); i++ {
 		if g.edges[from][i] == to {
 			return g.unsafeRmEdge(from, to, i)
@@ -116,8 +116,8 @@ func (g *mdg) unsafeRmEdge(from *Node, to *Node, edge int) error {
 
 // List all nodes and their forward edges line-by-line
 func (g *mdg) List() string {
-	defer g.lock.RUnlock()
 	g.lock.RLock()
+	defer g.lock.RUnlock()
 	s := ""
 	for i := 0; i < len(g.nodes); i++ {
 		s += fmt.Sprintf("node: (%v, <%p>), f-edges: [", g.nodes[i].name, g.nodes[i])
@@ -131,8 +131,8 @@ func (g *mdg) List() string {
 
 // IsNode compare node to list of nodes to confirm if it is or is not already being tracked
 func (g *mdg) IsNode(n *Node) bool {
-	defer g.lock.RUnlock()
 	g.lock.RLock()
+	defer g.lock.RUnlock()
 	for i := 0; i < len(g.nodes); i++ {
 		if g.nodes[i] == n {
 			return true
