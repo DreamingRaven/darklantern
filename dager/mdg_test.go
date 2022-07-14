@@ -6,6 +6,30 @@ import (
 	"testing"
 )
 
+func TestRemoveLastNode(t *testing.T) {
+	g := NewMDGDager()
+	nA := Node{name: "A", item: "someitem"}
+	nB := Node{name: "B", item: "someitem"}
+	err := g.AddNode(&nA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.AddNode(&nB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.RmNode(&nB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.RmNode(&nA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(g)
+
+}
+
 func TestNewMDGDager(t *testing.T) {
 	NewMDGDager()
 }
