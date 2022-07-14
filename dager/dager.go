@@ -1,4 +1,5 @@
 // Multi-Directed Acyclic Graph interfacer
+// abstracts graphs and their nodes' data in a nice format for neural networks
 package dager
 
 // nulti-Directed Acyclic-enforcing Graph intERface
