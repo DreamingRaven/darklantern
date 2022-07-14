@@ -26,8 +26,6 @@ func TestRemoveLastNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(g)
-
 }
 
 func TestNewMDGDager(t *testing.T) {
