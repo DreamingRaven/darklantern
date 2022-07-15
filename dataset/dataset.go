@@ -4,7 +4,6 @@ package dataset
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"gitlab.com/deepcypher/darklantern/erray"
 )
@@ -44,8 +43,7 @@ func (ds *exampleDataset[D, L]) Get(i int) (D, error) {
 
 // Length of the dataset so controlling code does not exceed the bounds of this
 func (ds *exampleDataset[D, L]) Length() (int, error) {
-	fmt.Println("Tr")
-	return 0, nil
+	return len(ds.data), nil
 }
 
 // ToJSON convert dataset internal struct to json bytes
