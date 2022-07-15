@@ -10,7 +10,7 @@ import (
 )
 
 // Dataset abstraction and definition of avaliable methods
-type Dataset interface {
+type Dataset[D DatasetCompatible[L], L LattigoCompatible] interface {
 	Get(i int) error
 	Length() (int, error)
 	ToJSON() ([]byte, error)
@@ -23,34 +23,34 @@ type LattigoCompatible interface {
 }
 
 // DatasetCompatible base data type of dataset objects directly
-type DatasetCompatible[T LattigoCompatible] interface {
-	~[]T | []erray.Erray[T]
+type DatasetCompatible[L LattigoCompatible] interface {
+	erray.Erray[L]
 }
 
 // exampleDataset the simplest dataset to show as an example
-type exampleDataset struct {
-	data []float32
+type exampleDataset[L LattigoCompatible] struct {
+	data []L
 }
 
 // NewExampleDataset initialises a new dataset object with some testable example data
-func NewExampleDataset() Dataset {
-	return &exampleDataset{}
+func NewExampleDataset[D DatasetCompatible[L], L LattigoCompatible]() Dataset[D, L] {
+	return &exampleDataset[L]{}
 }
 
 // Get a specific example from the dataset by index or error if impossible
-func (ds *exampleDataset) Get(i int) error {
+func (ds *exampleDataset[L]) Get(i int) error {
 	fmt.Println("Tr")
 	return nil
 }
 
 // Length of the dataset so controlling code does not exceed the bounds of this
-func (ds *exampleDataset) Length() (int, error) {
+func (ds *exampleDataset[L]) Length() (int, error) {
 	fmt.Println("Tr")
 	return 0, nil
 }
 
 // ToJSON convert dataset internal struct to json bytes
-func (ds *exampleDataset) ToJSON() ([]byte, error) {
+func (ds *exampleDataset[L]) ToJSON() ([]byte, error) {
 	marshalled, err := json.Marshal(ds)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (ds *exampleDataset) ToJSON() ([]byte, error) {
 }
 
 // FromJSON convert json bytes back into original struct
-func (ds *exampleDataset) FromJSON(bytes []byte) error {
+func (ds *exampleDataset[L]) FromJSON(bytes []byte) error {
 	err := json.Unmarshal(bytes, ds)
 	if err != nil {
 		return err
