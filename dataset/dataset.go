@@ -8,42 +8,42 @@ import (
 	"gitlab.com/deepcypher/darklantern/erray"
 )
 
+// LattigoCompat base data type of dataset compatible objects
+type LattigoCompat interface {
+	~float64 // | ~complex128
+}
+
+// DatasetCompat base data type of dataset objects directly
+type DatasetCompat[L LattigoCompat] interface {
+	erray.Erray[L]
+}
+
 // Dataset abstraction and definition of avaliable methods
-type Dataset[D DatasetCompatible[L], L LattigoCompatible] interface {
+type Dataset[D DatasetCompat[L], L LattigoCompat] interface {
 	Get(i int) (D, error)
 	Length() (int, error)
 	ToJSON() ([]byte, error)
 	FromJSON(bytes []byte) error
 }
 
-// LattigoCompatible base data type of dataset compatible objects
-type LattigoCompatible interface {
-	~float64 // | ~complex128
-}
-
-// DatasetCompatible base data type of dataset objects directly
-type DatasetCompatible[L LattigoCompatible] interface {
-	erray.Erray[L]
-}
-
 // exampleDataset the simplest dataset to show as an example
-type exampleDataset[D DatasetCompatible[L], L LattigoCompatible] struct {
-	data []D
+type exampleDataset[D DatasetCompat[L], L LattigoCompat] struct {
+	Data []D `json:"data"` // slice of individual examples
 }
 
 // NewExampleDataset initialises a new dataset object with some testable example data
-func NewExampleDataset[D DatasetCompatible[L], L LattigoCompatible]() Dataset[D, L] {
+func NewExampleDataset[D DatasetCompat[L], L LattigoCompat]() Dataset[D, L] {
 	return &exampleDataset[D, L]{}
 }
 
 // Get a specific example from the dataset by index or error if impossible
 func (ds *exampleDataset[D, L]) Get(i int) (D, error) {
-	return ds.data[i], nil
+	return ds.Data[i], nil
 }
 
 // Length of the dataset so controlling code does not exceed the bounds of this
 func (ds *exampleDataset[D, L]) Length() (int, error) {
-	return len(ds.data), nil
+	return len(ds.Data), nil
 }
 
 // ToJSON convert dataset internal struct to json bytes
