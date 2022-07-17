@@ -19,6 +19,15 @@ func sliceOfSlices[T LattigoCompat](examples, features int) [][]T {
 	return slice_slice
 }
 
+func TestSliceOfSlices(t *testing.T) {
+	ss := sliceOfSlices[float64](10, 20)
+	for i := 0; i < len(ss); i++ {
+		if ss[i][1] != float64(i) {
+			t.Fatal(fmt.Sprintf("slice of slices failed as %v != %v", ss[i], float64(i)))
+		}
+	}
+}
+
 func TestDatasetInit(t *testing.T) {
 	sliceOfSlices[float64](10, 20)
 	ds := NewSimpleDataset[erray.Erray[float64], float64]()
