@@ -57,20 +57,29 @@ func TestSliceOfErrays(t *testing.T) {
 func TestDatasetInit(t *testing.T) {
 	sos := sliceOfSlices[float64](10, 20)
 	soe := sliceOfErrays(sos)
-	ds := NewSimpleDataset[erray.Erray[float64], float64](soe)
-	fmt.Println(ds)
+	NewSimpleDataset[erray.Erray[float64], float64](soe)
 }
 
 func TestDatasetGet(t *testing.T) {
 	sos := sliceOfSlices[float64](10, 20)
 	soe := sliceOfErrays(sos)
 	ds := NewSimpleDataset[erray.Erray[float64], float64](soe)
-	fmt.Println(ds)
+	e, err := ds.Get(len(*sos) - 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(*e)
 }
 
 func TestDatasetLen(t *testing.T) {
 	sos := sliceOfSlices[float64](10, 20)
 	soe := sliceOfErrays(sos)
 	ds := NewSimpleDataset[erray.Erray[float64], float64](soe)
-	fmt.Println(ds)
+	dsLength, err := ds.Length()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if dsLength != len(*sos) {
+		t.Fatal("Number of examples in slice of slices does not equal number of examples in dataset")
+	}
 }
