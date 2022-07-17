@@ -20,6 +20,15 @@ func sliceOfSlices[T LattigoCompat](examples, features int) *[][]T {
 	return &slice_slice
 }
 
+func TestSliceOfSlices(t *testing.T) {
+	ss := sliceOfSlices[float64](10, 20)
+	for i := 0; i < len(*ss); i++ {
+		if (*ss)[i][1] != float64(i) {
+			t.Fatal(fmt.Sprintf("slice of slices failed as %v != %v", (*ss)[i], float64(i)))
+		}
+	}
+}
+
 func sliceOfErrays[T LattigoCompat](sos *[][]T) *[]erray.Erray[T] {
 	soe := make([]erray.Erray[T], len(*sos))
 	o := erray.NewCKKSErray[float64]()
@@ -32,13 +41,15 @@ func sliceOfErrays[T LattigoCompat](sos *[][]T) *[]erray.Erray[T] {
 	return &soe
 }
 
-func TestSliceOfSlices(t *testing.T) {
-	ss := sliceOfSlices[float64](10, 20)
-	for i := 0; i < len(*ss); i++ {
-		if (*ss)[i][1] != float64(i) {
-			t.Fatal(fmt.Sprintf("slice of slices failed as %v != %v", (*ss)[i], float64(i)))
+func TestSliceOfErrays(t *testing.T) {
+	sos := sliceOfSlices[float64](10, 20)
+	soe := sliceOfErrays(sos)
+	for i := 0; i < len(*soe); i++ {
+		if (*soe)[i] == nil {
+			t.Fatal("Slice of Errays giving back empty errays pointers but should be populated")
 		}
 	}
+
 }
 
 func TestDatasetInit(t *testing.T) {
