@@ -61,16 +61,23 @@ func TestDatasetInit(t *testing.T) {
 }
 
 func TestDatasetGet(t *testing.T) {
+	// construct dataset from slice of slices
 	sos := sliceOfSlices[float64](10, 20)
 	soe := sliceOfErrays(sos)
+
 	ds := NewSimpleDataset[erray.Erray[float64], float64](soe)
+
+	// now check dataset Get function returns what was originally there
+	// for each example row
 	for i := 0; i < len(*sos); i++ {
 		e, err := ds.Get(i)
 		if err != nil {
 			t.Fatal(err)
 		}
 		data_here := *(*e).GetData()
+		// for each feature in example row
 		for j := 0; j < len(data_here); j++ {
+			// if it does not match origin fail
 			if data_here[j] != (*sos)[i][j] {
 				t.Fatal(fmt.Sprintf("example [%v,%v] does not match %v != %v", i, j, data_here[j], (*sos)[i][j]))
 			}
