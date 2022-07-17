@@ -8,16 +8,16 @@ import (
 )
 
 func TestDatasetInit(t *testing.T) {
-	ds := NewExampleDataset[erray.Erray[float64], float64]()
+	ds := NewSimpleDataset[erray.Erray[float64], float64]()
 	fmt.Println(ds)
 }
 
 func TestDatasetGet(t *testing.T) {
-	ds := NewExampleDataset[erray.Erray[float64], float64]()
+	ds := NewSimpleDataset[erray.Erray[float64], float64]()
 	fmt.Println(ds)
 }
 
 func TestDatasetLen(t *testing.T) {
-	ds := NewExampleDataset[erray.Erray[float64], float64]()
+	ds := NewSimpleDataset[erray.Erray[float64], float64]()
 	fmt.Println(ds)
 }

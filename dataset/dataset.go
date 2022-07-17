@@ -26,28 +26,28 @@ type Dataset[D DatasetCompat[L], L LattigoCompat] interface {
 	FromJSON(bytes []byte) error
 }
 
-// exampleDataset the simplest dataset to show as an example
-type exampleDataset[D DatasetCompat[L], L LattigoCompat] struct {
+// simpleDataset the simplest dataset to show as an example
+type simpleDataset[D DatasetCompat[L], L LattigoCompat] struct {
 	Data []D `json:"data"` // slice of individual examples
 }
 
-// NewExampleDataset initialises a new dataset object with some testable example data
-func NewExampleDataset[D DatasetCompat[L], L LattigoCompat]() Dataset[D, L] {
-	return &exampleDataset[D, L]{}
+// NewSimpleDataset initialises a new dataset object with some testable example data
+func NewSimpleDataset[D DatasetCompat[L], L LattigoCompat]() Dataset[D, L] {
+	return &simpleDataset[D, L]{}
 }
 
 // Get a specific example from the dataset by index or error if impossible
-func (ds *exampleDataset[D, L]) Get(i int) (D, error) {
+func (ds *simpleDataset[D, L]) Get(i int) (D, error) {
 	return ds.Data[i], nil
 }
 
 // Length of the dataset so controlling code does not exceed the bounds of this
-func (ds *exampleDataset[D, L]) Length() (int, error) {
+func (ds *simpleDataset[D, L]) Length() (int, error) {
 	return len(ds.Data), nil
 }
 
 // ToJSON convert dataset internal struct to json bytes
-func (ds *exampleDataset[D, L]) ToJSON() ([]byte, error) {
+func (ds *simpleDataset[D, L]) ToJSON() ([]byte, error) {
 	marshalled, err := json.Marshal(ds)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (ds *exampleDataset[D, L]) ToJSON() ([]byte, error) {
 }
 
 // FromJSON convert json bytes back into original struct
-func (ds *exampleDataset[D, L]) FromJSON(bytes []byte) error {
+func (ds *simpleDataset[D, L]) FromJSON(bytes []byte) error {
 	err := json.Unmarshal(bytes, ds)
 	if err != nil {
 		return err
