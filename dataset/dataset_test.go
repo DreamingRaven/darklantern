@@ -31,12 +31,14 @@ func TestSliceOfSlices(t *testing.T) {
 
 func sliceOfErrays[T LattigoCompat](sos *[][]T) *[]erray.Erray[T] {
 	soe := make([]erray.Erray[T], len(*sos))
-	o := erray.NewCKKSErray[float64]()
+	e := erray.NewCKKSErray[T]()
 	parms, _ := ckks.NewParametersFromLiteral(ckks.PN12QP109)
-	o.SetParams(&parms)
+	e.SetParams(&parms)
 	for i := 0; i < len(*sos); i++ {
 		// soe[i] =
-		fmt.Println((*sos)[i])
+		bud := e.Bud()
+		bud.SetData(&(*sos)[i])
+		soe[i] = bud
 	}
 	return &soe
 }
