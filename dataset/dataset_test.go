@@ -64,11 +64,18 @@ func TestDatasetGet(t *testing.T) {
 	sos := sliceOfSlices[float64](10, 20)
 	soe := sliceOfErrays(sos)
 	ds := NewSimpleDataset[erray.Erray[float64], float64](soe)
-	e, err := ds.Get(len(*sos) - 1)
-	if err != nil {
-		t.Fatal(err)
+	for i := 0; i < len(*sos); i++ {
+		e, err := ds.Get(i)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data_here := *(*e).GetData()
+		for j := 0; j < len(data_here); j++ {
+			if data_here[j] != (*sos)[i][j] {
+				t.Fatal(fmt.Sprintf("example [%v,%v] does not match %v != %v", i, j, data_here[j], (*sos)[i][j]))
+			}
+		}
 	}
-	fmt.Println(*e)
 }
 
 func TestDatasetLen(t *testing.T) {
