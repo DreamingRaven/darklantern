@@ -6,7 +6,7 @@ import (
 )
 
 // helper function to generate a dud example slice of slices
-func sliceOfSlices[T LattigoCompat](examples, features int) *[][]T {
+func ExampleSliceOfSlices[T LattigoCompat](examples, features int) *[][]T {
 	slice_slice := make([][]T, examples)
 	for i := 0; i < examples; i++ {
 		slice_slice[i] = make([]T, features)

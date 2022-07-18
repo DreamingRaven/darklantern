@@ -8,7 +8,7 @@ import (
 )
 
 func TestSliceOfSlices(t *testing.T) {
-	ss := sliceOfSlices[float64](10, 20)
+	ss := ExampleSliceOfSlices[float64](10, 20)
 	for i := 0; i < len(*ss); i++ {
 		if (*ss)[i][1] != float64(i) {
 			t.Fatal(fmt.Sprintf("slice of slices failed as %v != %v", (*ss)[i], float64(i)))
@@ -17,7 +17,7 @@ func TestSliceOfSlices(t *testing.T) {
 }
 
 func TestSliceOfErrays(t *testing.T) {
-	sos := sliceOfSlices[float64](10, 20)
+	sos := ExampleSliceOfSlices[float64](10, 20)
 	soe := SliceOfErrays(sos)
 	for i := 0; i < len(*soe); i++ {
 		if (*soe)[i] == nil {
@@ -28,14 +28,14 @@ func TestSliceOfErrays(t *testing.T) {
 }
 
 func TestDatasetInit(t *testing.T) {
-	sos := sliceOfSlices[float64](10, 20)
+	sos := ExampleSliceOfSlices[float64](10, 20)
 	soe := SliceOfErrays(sos)
 	NewSimpleDataset[erray.Erray[float64], float64](soe)
 }
 
 func TestDatasetGet(t *testing.T) {
 	// construct dataset from slice of slices
-	sos := sliceOfSlices[float64](10, 20)
+	sos := ExampleSliceOfSlices[float64](10, 20)
 	soe := SliceOfErrays(sos)
 
 	ds := NewSimpleDataset[erray.Erray[float64], float64](soe)
@@ -59,7 +59,7 @@ func TestDatasetGet(t *testing.T) {
 }
 
 func TestDatasetLen(t *testing.T) {
-	sos := sliceOfSlices[float64](10, 20)
+	sos := ExampleSliceOfSlices[float64](10, 20)
 	soe := SliceOfErrays(sos)
 	ds := NewSimpleDataset[erray.Erray[float64], float64](soe)
 	dsLength, err := ds.Length()
