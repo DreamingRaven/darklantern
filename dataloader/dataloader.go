@@ -50,10 +50,6 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 			dsidx[i], dsidx[j] = dsidx[j], dsidx[i]
 		})
 	}
-	// semaphore to dictate when master channel should close
-	sem := make(semaphore, length)
-	// single aggregator channel of all workers for for loops
-	ch := make(chan D)
 
 	sample := 0
 	proportion := float64(length) / float64(batchSize)
@@ -63,12 +59,18 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 	} else {
 		num_batches = int(math.Floor(proportion))
 	}
-	fmt.Println("ITERATING", proportion, num_batches)
+
+	// semaphore to dictate when master channel should close
+	sem := make(semaphore, length)
+	// single aggregator channel of all workers for for loops
+	ch := make(chan D)
 	// for each batch (zero indexed)
 	for i := 0; i < num_batches; i++ {
-		batch := make([]D, batchSize)
+		batch := make([]*D, batchSize)
 		// for each slot in batch
 		for j := 0; j < batchSize; j++ {
+			example, _ := ds.Get(dsidx[sample])
+			batch[j] = example
 			sample++
 		}
 		fmt.Println(fmt.Sprintf("sample:%v,bid:%v,batch:%v", sample, i, batch))
