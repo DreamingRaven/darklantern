@@ -1,6 +1,7 @@
 package dataloader
 
 import (
+	"fmt"
 	"testing"
 
 	"gitlab.com/deepcypher/darklantern/dataset"
@@ -11,5 +12,8 @@ func TestDataloading(t *testing.T) {
 	sos := dataset.ExampleSliceOfSlices[float64](100, 10)
 	soe := dataset.SliceOfErrays(sos)
 	ds := dataset.NewSimpleDataset[erray.Erray[float64], float64](soe)
-	SimpleDataloader(ds, 4, 32, true, true)
+	ch, _ := SimpleDataloader(ds, 4, 32, true, true)
+	for batch := range ch {
+		fmt.Println(batch)
+	}
 }
