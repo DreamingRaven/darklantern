@@ -141,10 +141,20 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 	ordered_channel := make(chan []*D)
 	// dispatcher goroutine to keep dispatching new jobs so workers are always busy
 	go func() {
-		for i := 0; i < num_batches; i++ {
-
+		// kick off all starting workers
+		for i := 0; i < workers; i++ {
+			go getBatch(&batch_channel, ds, &epoch, i, batchSize, &dsidx)
 		}
-		// closing channels when epochs are complete
+		// while not reached the end of number of batches
+		b := 0 + workers
+		for b < num_batches {
+			// if workers have not finished but the next in line is in cache pipe it to channel
+			// if worker has finished but is not the next cache result and start next
+			// if worker has finished and is the very next in line pipe into channel and start next
+			time.Sleep(100 * time.Second)
+			b++
+		}
+		// closing channels when this epoch is complete
 		// epoch.Wait()
 		close(batch_channel)
 		close(ordered_channel)
