@@ -40,7 +40,6 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 	} else {
 		num_batches = int(math.Floor(proportion))
 	}
-	fmt.Println(num_batches)
 
 	// creating waitor to keep track of how far we have gotten
 	var epoch sync.WaitGroup
@@ -50,34 +49,48 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 	ordered_channel := make(chan []*D)
 	// dispatcher goroutine to keep dispatching new jobs so workers are always busy
 	go func() {
+		b := 0
 		// kick off all starting workers
 		for i := 0; i < workers; i++ {
-			go getBatch(&batch_channel, ds, &epoch, i, batchSize, &dsidx)
+			// guard against more workers than batches
+			if i < num_batches {
+				go func() {
+					batch_channel <- getBatch(ds, i, batchSize, &dsidx)
+					epoch.Done()
+				}()
+				b++
+			}
 		}
 		// while not reached the end of number of batches
-		b := 0 + workers
 		for b < num_batches {
-			// if workers have not finished but the next in line is in cache pipe it to channel
-			// if worker has finished but is not the next cache result and start next
-			// if worker has finished and is the very next in line pipe into channel and start next
-			time.Sleep(100 * time.Second)
+			next := <-batch_channel
+			ordered_channel <- next
+			time.Sleep(10 * time.Second)
 			b++
+			fmt.Println("processing batch ", b)
 		}
 		// closing channels when this epoch is complete
 		// epoch.Wait()
+		time.Sleep(10 * time.Second)
+		fmt.Println("CLOSING CHANNELS")
 		close(batch_channel)
 		close(ordered_channel)
 	}()
+	fmt.Println("Begin the channeling 2")
 	return ordered_channel, nil
 }
 
 // getBatch by number and batch size this will also reference the mapping for precisely which indexes to use from the dataset
-func getBatch[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ch *chan []*D, ds dataset.Dataset[D, L], wg *sync.WaitGroup, batch int, batchSize int, mapping *[]int) {
-	defer wg.Done()
+func getBatch[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds dataset.Dataset[D, L], batch int, batchSize int, mapping *[]int) []*D {
 	b := make([]*D, batchSize)
 	for i := batch * batchSize; i < (batch+1)*batchSize; i++ {
+		// in case we are to populate a partial batch check we have
+		// not exceeded the bounds of mapping
+		if i > len(*mapping) {
+			break
+		}
 		sample, _ := ds.Get((*mapping)[i])
 		b[i-(batch*batchSize)] = sample
 	}
-	*ch <- b
+	return b
 }
