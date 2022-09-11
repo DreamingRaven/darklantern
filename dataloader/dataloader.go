@@ -45,52 +45,100 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 	var epoch sync.WaitGroup
 	epoch.Add(num_batches)
 	// channel to collect individual batches ready for ordering
-	batch_channel := make(chan []*D, workers)
+	batch_channel := make(chan knownBatch[D, L], workers)
 	ordered_channel := make(chan []*D)
+
 	// dispatcher goroutine to keep dispatching new jobs so workers are always busy
 	go func() {
 		b := 0
-		// kick off all starting workers
+		bCache := make([]*[]*D, num_batches)
+		fmt.Println("Launching initial workers...")
+		// launch full set of initial workers
 		for i := 0; i < workers; i++ {
-			// guard against more workers than batches
-			if i < num_batches {
-				go func() {
-					batch_channel <- getBatch(ds, i, batchSize, &dsidx)
-					epoch.Done()
-				}()
-				b++
-			}
+			// goroutine + channel wrapped worker
+			fmt.Println("Worker:", i, "launch")
+			go func(batch int) {
+				batch_channel <- getBatch(ds, batch, batchSize, &dsidx)
+				epoch.Done()
+			}(i)
 		}
-		// while not reached the end of number of batches
-		for b < num_batches {
-			next := <-batch_channel
-			ordered_channel <- next
-			time.Sleep(10 * time.Second)
-			b++
-			fmt.Println("processing batch ", b)
+		nextWorker := workers
+
+		fmt.Println("Managing workers and worker channel...")
+		// watch channel for worker outputs and re-schedule completed workers
+		for kb := range batch_channel {
+			// exit from infinite loop
+			fmt.Printf("loop b:%v, cache:%v\n", b, bCache)
+			fmt.Println(kb)
+			if b == num_batches {
+				close(batch_channel)
+				break
+			}
+			// if the next batch in the channel is the next batch in sequence
+			if kb.metadata.id == b {
+				// return in channel
+				ordered_channel <- *kb.batch
+				// requeue worker as next worker
+				go func(batch int) {
+					batch_channel <- getBatch(ds, batch, batchSize, &dsidx)
+					epoch.Done()
+				}(nextWorker)
+				nextWorker += 1
+				b += 1
+			} else {
+				// insert into cache
+				bCache[kb.metadata.id] = kb.batch
+				// do not requeue worker
+			}
+			// now check if we have any thing(s) in cache waiting to be sent off
+			for range bCache {
+				if bCache[b] != nil {
+					// take from cache into channel
+					ordered_channel <- *bCache[b]
+					// nillify cache position
+					bCache[b] = nil
+					// requeue worker as next worker
+					go func(batch int) {
+						batch_channel <- getBatch(ds, batch, batchSize, &dsidx)
+						epoch.Done()
+					}(nextWorker)
+					nextWorker += 1
+					b += 1
+				} else {
+					// early exit from this batch cache scan as the successor is not in the cache
+					break
+				}
+			}
+
+			// // we dont want to bomb resources so sleep until next loop
+			// time.Sleep(1 * time.Second)
 		}
 		// closing channels when this epoch is complete
 		// epoch.Wait()
-		time.Sleep(10 * time.Second)
+		// time.Sleep(10 * time.Second)
 		fmt.Println("CLOSING CHANNELS")
-		close(batch_channel)
 		close(ordered_channel)
 	}()
 	fmt.Println("Begin the channeling 2")
 	return ordered_channel, nil
 }
 
+type workerMetadata struct {
+	id int
+}
+
+type knownBatch[D dataset.DatasetCompat[L], L dataset.LattigoCompat] struct {
+	metadata workerMetadata
+	batch    *[]*D
+}
+
 // getBatch by number and batch size this will also reference the mapping for precisely which indexes to use from the dataset
-func getBatch[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds dataset.Dataset[D, L], batch int, batchSize int, mapping *[]int) []*D {
+func getBatch[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds dataset.Dataset[D, L], batch int, batchSize int, mapping *[]int) knownBatch[D, L] {
 	b := make([]*D, batchSize)
-	for i := batch * batchSize; i < (batch+1)*batchSize; i++ {
-		// in case we are to populate a partial batch check we have
-		// not exceeded the bounds of mapping
-		if i > len(*mapping) {
-			break
-		}
+	for i := batch * batchSize; i < (batch+1)*batchSize && i < len(*mapping); i++ {
 		sample, _ := ds.Get((*mapping)[i])
 		b[i-(batch*batchSize)] = sample
 	}
-	return b
+	kb := knownBatch[D, L]{metadata: workerMetadata{id: batch}, batch: &b}
+	return kb
 }

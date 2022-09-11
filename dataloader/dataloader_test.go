@@ -18,18 +18,18 @@ func TestGetBatch(t *testing.T) {
 	for i := 0; i < len(dsidx); i++ {
 		dsidx[i] = i
 	}
-	batch := getBatch(ds, 2, 32, &dsidx)
-	if len(batch) != 32 {
+	kb := getBatch(ds, 2, 32, &dsidx)
+	if len(*kb.batch) != 32 {
 		t.Fatal("getBatch has not created a batch of the right size")
 	}
-	if batch[0] == nil {
+	if (*kb.batch)[0] == nil {
 		t.Fatal("getBatch has not populated with a pointer to the data")
 	}
-	if batch[len(batch)-1] == nil {
+	if (*kb.batch)[len(*kb.batch)-1] == nil {
 		t.Fatal("getBatch has not populated with a pointer to the data")
 	}
-	batch = getBatch(ds, 600, 32, &dsidx)
-	if batch[0] != nil {
+	kb = getBatch(ds, 600, 32, &dsidx)
+	if (*kb.batch)[0] != nil {
 		t.Fatal("getBatch has failed to get nil filled batch when selecting out of bounds")
 	}
 }
@@ -44,3 +44,14 @@ func TestDataloading(t *testing.T) {
 		fmt.Println(batch)
 	}
 }
+
+// func TestMultiDataloading(t *testing.T) {
+// 	sos := dataset.ExampleSliceOfSlices[float64](100, 10)
+// 	soe := dataset.SliceOfErrays(sos)
+// 	ds := dataset.NewSimpleDataset[erray.Erray[float64], float64](soe)
+// 	ch, _ := SimpleDataloader(ds, 4, 32, true, true)
+// 	for batch := range ch {
+// 		fmt.Println("Am I even running")
+// 		fmt.Println(batch)
+// 	}
+// }
