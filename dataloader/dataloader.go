@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"sync"
 	"time"
 
 	"gitlab.com/deepcypher/darklantern/dataset"
@@ -42,8 +41,8 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 	}
 
 	// creating waitor to keep track of how far we have gotten
-	var epoch sync.WaitGroup
-	epoch.Add(num_batches)
+	// var epoch sync.WaitGroup
+	// epoch.Add(num_batches)
 	// channel to collect individual batches ready for ordering
 	batch_channel := make(chan knownBatch[D, L], workers)
 	ordered_channel := make(chan []*D)
@@ -59,19 +58,19 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 			fmt.Println("Worker:", i, "launch")
 			go func(batch int) {
 				batch_channel <- getBatch(ds, batch, batchSize, &dsidx)
-				epoch.Done()
+				// epoch.Done()
 			}(i)
 		}
 		nextWorker := workers
 
 		fmt.Println("Managing workers and worker channel...")
 		// watch channel for worker outputs and re-schedule completed workers
+		// TODO workers are overunning we are queueing too many
 		for kb := range batch_channel {
 			// exit from infinite loop
 			fmt.Printf("loop b:%v, cache:%v\n", b, bCache)
-			fmt.Println(kb)
+			// fmt.Println(kb)
 			if b == num_batches {
-				close(batch_channel)
 				break
 			}
 			// if the next batch in the channel is the next batch in sequence
@@ -81,17 +80,20 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 				// requeue worker as next worker
 				go func(batch int) {
 					batch_channel <- getBatch(ds, batch, batchSize, &dsidx)
-					epoch.Done()
+					// epoch.Done()
 				}(nextWorker)
 				nextWorker += 1
 				b += 1
-			} else {
+			} else if kb.metadata.id < num_batches {
 				// insert into cache
 				bCache[kb.metadata.id] = kb.batch
 				// do not requeue worker
 			}
 			// now check if we have any thing(s) in cache waiting to be sent off
 			for range bCache {
+				if b == num_batches {
+					break
+				}
 				if bCache[b] != nil {
 					// take from cache into channel
 					ordered_channel <- *bCache[b]
@@ -100,7 +102,7 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 					// requeue worker as next worker
 					go func(batch int) {
 						batch_channel <- getBatch(ds, batch, batchSize, &dsidx)
-						epoch.Done()
+						// epoch.Done()
 					}(nextWorker)
 					nextWorker += 1
 					b += 1
@@ -117,9 +119,10 @@ func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds da
 		// epoch.Wait()
 		// time.Sleep(10 * time.Second)
 		fmt.Println("CLOSING CHANNELS")
+		close(batch_channel)
 		close(ordered_channel)
 	}()
-	fmt.Println("Begin the channeling 2")
+	fmt.Println("Begin Channeling")
 	return ordered_channel, nil
 }
 

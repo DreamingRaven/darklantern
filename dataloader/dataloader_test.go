@@ -39,9 +39,10 @@ func TestDataloading(t *testing.T) {
 	soe := dataset.SliceOfErrays(sos)
 	ds := dataset.NewSimpleDataset[erray.Erray[float64], float64](soe)
 	ch, _ := SimpleDataloader(ds, 4, 32, true, true)
+	i := 0
 	for batch := range ch {
-		fmt.Println("Am I even running")
-		fmt.Println(batch)
+		fmt.Printf("batch: %v, len: %v\n", i, len(batch))
+		i += 1
 	}
 }
 
