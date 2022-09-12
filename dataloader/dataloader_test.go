@@ -1,7 +1,6 @@
 package dataloader
 
 import (
-	"fmt"
 	"testing"
 
 	"gitlab.com/deepcypher/darklantern/dataset"
@@ -41,18 +40,28 @@ func TestDataloading(t *testing.T) {
 	ch, _ := SimpleDataloader(ds, 4, 32, true, true)
 	i := 0
 	for batch := range ch {
-		fmt.Printf("batch: %v, len: %v\n", i, len(batch))
+		// fmt.Printf("batch: %v, len: %v\n", i, len(batch))
+		if batch == nil {
+			t.Fatal("batch returned nil pointer")
+		}
+		for j := 0; j < len(batch); j++ {
+			b := batch[j]
+			// if not nil observation due to being partial batch
+			if b != nil {
+				dat := (*b).GetData()
+				// fmt.Println(dat)
+				// checking that there is no intra-shuffling of observations
+				for k := 0; k < len(*dat); k++ {
+					if k != 0 {
+						if (*dat)[k] < (*dat)[k-1] {
+							t.Fatalf("'%v' is not greater than previous '%v' the observation has been intra-shuffled!", (*dat)[k], (*dat)[k-1])
+						}
+					}
+				}
+			} else {
+				// fmt.Println(b)
+			}
+		}
 		i += 1
 	}
 }
-
-// func TestMultiDataloading(t *testing.T) {
-// 	sos := dataset.ExampleSliceOfSlices[float64](100, 10)
-// 	soe := dataset.SliceOfErrays(sos)
-// 	ds := dataset.NewSimpleDataset[erray.Erray[float64], float64](soe)
-// 	ch, _ := SimpleDataloader(ds, 4, 32, true, true)
-// 	for batch := range ch {
-// 		fmt.Println("Am I even running")
-// 		fmt.Println(batch)
-// 	}
-// }
