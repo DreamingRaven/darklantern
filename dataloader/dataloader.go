@@ -12,8 +12,8 @@ import (
 
 // http://www.golangpatterns.info/concurrency/generators
 
-// SimpleDataloader loads arbitrary dataset into batches and divides work between workers
-func SimpleDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds dataset.Dataset[D, L], workers int, batchSize int, shuffle bool, allowSmallBatch bool) (chan []*D, error) {
+// GeneralDataloader loads arbitrary dataset into batches and divides work between workers and is intended for use with generic 'dataset.Dataset' datasets
+func GeneralDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds dataset.Dataset[D, L], workers int, batchSize int, shuffle bool, allowSmallBatch bool) (chan []*D, error) {
 	// create a semaphore so we know when we are finished and to lock all resources
 	length, _ := ds.Length()
 	// constructing default mapping (dsidx) (before shuffling) to indicate which examples fall in which order
