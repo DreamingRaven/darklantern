@@ -4,20 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+
+	"gitlab.com/deepcypher/darklantern/node"
 )
 
 // Multi-Directed Graph but not itself acyclic
 type mdg struct {
-	nodes []*Node
-	edges map[*Node][]*Node
+	nodes []*node.Node
+	edges map[*node.Node][]*node.Node
 	lock  sync.RWMutex
 }
 
 // AddNode adds a given node to the graph as is
 // returns error if node is already present by address
-func (g *mdg) AddNode(n *Node) error {
+func (g *mdg) AddNode(n *node.Node) error {
 	if g.IsNode(n) {
-		return errors.New(fmt.Sprintf("node: (%v, <%p>) already exists", n.name, n))
+		return errors.New(fmt.Sprintf("node: (%v, <%p>) already exists", n.Name, n))
 	}
 	g.lock.Lock()
 	defer g.lock.Unlock()
@@ -27,10 +29,10 @@ func (g *mdg) AddNode(n *Node) error {
 
 // AddEdge adds a single directed edge between two nodes
 // returns error if either node does not already exist
-func (g *mdg) AddEdge(from, to *Node) error {
+func (g *mdg) AddEdge(from, to *node.Node) error {
 	if !g.IsNode(from) || !g.IsNode(to) {
 		return errors.New(fmt.Sprintf("one of (%v, <%p>) (%v, <%p>) does not exist in graph",
-			from.name, from, to.name, to))
+			from.Name, from, to.Name, to))
 	}
 
 	g.lock.Lock()
@@ -40,7 +42,7 @@ func (g *mdg) AddEdge(from, to *Node) error {
 }
 
 // RmNode removes a node and its associated edges
-func (g *mdg) RmNode(n *Node) error {
+func (g *mdg) RmNode(n *node.Node) error {
 	g.lock.Lock()
 	defer g.lock.Unlock()
 	// for each node
@@ -70,21 +72,21 @@ func (g *mdg) RmNode(n *Node) error {
 				g.nodes[i] = g.nodes[len(g.nodes)-1]
 				g.nodes = g.nodes[:len(g.nodes)-1]
 			} else {
-				g.nodes = make([]*Node, 0)
+				g.nodes = make([]*node.Node, 0)
 			}
 			// Normal exit
 			return nil
 		}
 	}
 	// Abnormal instructions exit
-	return errors.New(fmt.Sprintf("node: (%v, <%p>) does not exist cant remove", n.name, n))
+	return errors.New(fmt.Sprintf("node: (%v, <%p>) does not exist cant remove", n.Name, n))
 }
 
 // RmEdge removed a directed edge between two nodes
-func (g *mdg) RmEdge(from, to *Node) error {
+func (g *mdg) RmEdge(from, to *node.Node) error {
 	if !g.IsNode(from) || !g.IsNode(to) {
 		return errors.New(fmt.Sprintf("one of (%v, <%p>) (%v, <%p>) does not exist in graph",
-			from.name, from, to.name, to))
+			from.Name, from, to.Name, to))
 	}
 	g.lock.Lock()
 	defer g.lock.Unlock()
@@ -94,23 +96,23 @@ func (g *mdg) RmEdge(from, to *Node) error {
 		}
 	}
 	return errors.New(fmt.Sprintf("could not find edge (%v, <%p>)->(%v, <%p>)",
-		from.name, from, to.name, to))
+		from.Name, from, to.Name, to))
 }
 
 // unsafeRmEdge a standalone function to clear an edge from a node without the safetey of its own locks
-func (g *mdg) unsafeRmEdge(from *Node, to *Node, edge int) error {
+func (g *mdg) unsafeRmEdge(from *node.Node, to *node.Node, edge int) error {
 	if g.edges[from][edge] == to {
 		if len(g.edges[from]) > 1 {
 			g.edges[from][edge] = g.edges[from][len(g.edges[from])-1]
 			g.edges[from] = g.edges[from][:len(g.edges[from])-1]
 		} else {
-			g.edges[from] = make([]*Node, 0)
+			g.edges[from] = make([]*node.Node, 0)
 		}
 		return nil
 	}
 	return errors.New(fmt.Sprintf(
 		// No edge between (from <pointer>)-[edge]->(to <pointer>)
-		"No edge between (%v, <%p>)-[%v]->(%v, <%p>) ", from.name, from, edge, to.name, to,
+		"No edge between (%v, <%p>)-[%v]->(%v, <%p>) ", from.Name, from, edge, to.Name, to,
 	))
 }
 
@@ -120,7 +122,7 @@ func (g *mdg) List() string {
 	defer g.lock.RUnlock()
 	s := ""
 	for i := 0; i < len(g.nodes); i++ {
-		s += fmt.Sprintf("node: (%v, <%p>), f-edges: [", g.nodes[i].name, g.nodes[i])
+		s += fmt.Sprintf("node: (%v, <%p>), f-edges: [", g.nodes[i].Name, g.nodes[i])
 		for j := 0; j < len(g.edges[g.nodes[i]]); j++ {
 			s += fmt.Sprintf("(%v, <%p>)", g.edges[g.nodes[i]][j], g.edges[g.nodes[i]][j])
 		}
@@ -130,7 +132,7 @@ func (g *mdg) List() string {
 }
 
 // IsNode compare node to list of nodes to confirm if it is or is not already being tracked
-func (g *mdg) IsNode(n *Node) bool {
+func (g *mdg) IsNode(n *node.Node) bool {
 	g.lock.RLock()
 	defer g.lock.RUnlock()
 	for i := 0; i < len(g.nodes); i++ {
@@ -143,5 +145,5 @@ func (g *mdg) IsNode(n *Node) bool {
 
 // NewMDGDager initialises a multi-directed graph (MDG) struct and wraps it in the Dager handling interface
 func NewMDGDager() Dager {
-	return &mdg{edges: make(map[*Node][]*Node)}
+	return &mdg{edges: make(map[*node.Node][]*node.Node)}
 }

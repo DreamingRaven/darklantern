@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"gitlab.com/deepcypher/darklantern/node"
 )
 
 func TestRemoveLastNode(t *testing.T) {
 	g := NewMDGDager()
-	nA := Node{name: "A", item: "someitem"}
-	nB := Node{name: "B", item: "someitem"}
+	nA := node.Node{Name: "A", Item: "someitem"}
+	nB := node.Node{Name: "B", Item: "someitem"}
 	err := g.AddNode(&nA)
 	if err != nil {
 		t.Fatal(err)
@@ -34,8 +36,8 @@ func TestNewMDGDager(t *testing.T) {
 
 func TestNodeManipulation(t *testing.T) {
 	g := NewMDGDager()
-	nA := Node{name: "A", item: "someitem"}
-	nB := Node{name: "B", item: "someitem"}
+	nA := node.Node{Name: "A", Item: "someitem"}
+	nB := node.Node{Name: "B", Item: "someitem"}
 
 	// adding the same node twice
 	g.AddNode(&nA)
@@ -76,10 +78,10 @@ func TestNodeManipulation(t *testing.T) {
 
 func TestEdgeManipulation(t *testing.T) {
 	g := NewMDGDager()
-	nA := Node{name: "A", item: "in the graph"}
-	nB := Node{name: "B", item: "in the graph"}
-	nC := Node{name: "C", item: "in the graph"}
-	nD := Node{name: "D", item: "not in the graph"}
+	nA := node.Node{Name: "A", Item: "in the graph"}
+	nB := node.Node{Name: "B", Item: "in the graph"}
+	nC := node.Node{Name: "C", Item: "in the graph"}
+	nD := node.Node{Name: "D", Item: "not in the graph"}
 
 	g.AddNode(&nA)
 	g.AddNode(&nB)
@@ -127,9 +129,9 @@ func TestAdjacentManipulation(t *testing.T) {
 
 	g := NewMDGDager()
 
-	nA := Node{name: "A", item: "someitem"}
-	nB := Node{name: "B", item: "someitem"}
-	nC := Node{name: "C", item: "someitem"}
+	nA := node.Node{Name: "A", Item: "someitem"}
+	nB := node.Node{Name: "B", Item: "someitem"}
+	nC := node.Node{Name: "C", Item: "someitem"}
 
 	g.AddNode(&nA)
 	g.AddNode(&nB)
@@ -169,9 +171,9 @@ func TestList(t *testing.T) {
 
 	g := NewMDGDager()
 
-	nA := Node{name: "A", item: "someitem"}
-	nB := Node{name: "B", item: "someitem"}
-	nC := Node{name: "C", item: "someitem"}
+	nA := node.Node{Name: "A", Item: "someitem"}
+	nB := node.Node{Name: "B", Item: "someitem"}
+	nC := node.Node{Name: "C", Item: "someitem"}
 
 	g.AddNode(&nA)
 	g.AddNode(&nB)

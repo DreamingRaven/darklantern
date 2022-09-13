@@ -11,5 +11,14 @@ import (
 )
 
 func TestNode(t *testing.T) {
-	t.Fatalf("Node incomplete")
+	nA := Node{Name: "A", Item: "someitem"}
+	nB := Node{Name: "B", Item: "SomethingElse"}
+	if nA == nB {
+		t.Fatalf("Different nodes are somehow equal %v == %v", nA, nB)
+	}
+	nA.Name = "B"
+	nA.Item = "SomethingElse"
+	if nA != nB {
+		t.Fatalf("Modified and declared nodes not equal %v != %v", nA, nB)
+	}
 }
