@@ -6,13 +6,14 @@ import (
 	"sync"
 	"time"
 
+	dt "gitlab.com/deepcypher/darklantern/darktype"
 	"gitlab.com/deepcypher/darklantern/dataset"
 )
 
 // http://www.golangpatterns.info/concurrency/generators
 
 // GeneralDataloader loads arbitrary dataset into batches and divides work between workers and is intended for use with generic 'dataset.Dataset' datasets
-func GeneralDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds dataset.Dataset[D, L], workers int, batchSize int, shuffle bool, allowSmallBatch bool) (chan []*D, error) {
+func GeneralDataloader[D dataset.DatasetCompat[L], L dt.LattigoCompat](ds dataset.Dataset[D, L], workers int, batchSize int, shuffle bool, allowSmallBatch bool) (chan []*D, error) {
 	// create a semaphore so we know when we are finished and to lock all resources
 	length, _ := ds.Length()
 	// constructing default mapping (dsidx) (before shuffling) to indicate which examples fall in which order
@@ -138,13 +139,13 @@ type workerMetadata struct {
 	id int
 }
 
-type knownBatch[D dataset.DatasetCompat[L], L dataset.LattigoCompat] struct {
+type knownBatch[D dataset.DatasetCompat[L], L dt.LattigoCompat] struct {
 	metadata workerMetadata
 	batch    *[]*D
 }
 
 // getBatch by number and batch size this will also reference the mapping for precisely which indexes to use from the dataset
-func getBatch[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds dataset.Dataset[D, L], batch int, batchSize int, mapping *[]int) knownBatch[D, L] {
+func getBatch[D dataset.DatasetCompat[L], L dt.LattigoCompat](ds dataset.Dataset[D, L], batch int, batchSize int, mapping *[]int) knownBatch[D, L] {
 	b := make([]*D, batchSize)
 	for i := batch * batchSize; i < (batch+1)*batchSize && i < len(*mapping); i++ {
 		sample, _ := ds.Get((*mapping)[i])
