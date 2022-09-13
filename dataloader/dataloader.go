@@ -1,7 +1,6 @@
 package dataloader
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"sync"
@@ -51,7 +50,7 @@ func GeneralDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds d
 	// closing function for batch channels
 	go func() {
 		epoch.Wait()
-		fmt.Println("closing batch channel")
+		// log.Print("closing batch channel")
 		close(batch_channel)
 	}()
 
@@ -59,11 +58,11 @@ func GeneralDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds d
 	go func() {
 		b := 0
 		bCache := make([]*[]*D, num_batches)
-		fmt.Println("Launching initial workers...")
+		// log.Print("Launching initial workers...")
 		// launch full set of initial workers
 		for i := 0; i < workers; i++ {
 			// goroutine + channel wrapped worker
-			fmt.Println("Worker:", i, "launch")
+			// log.Print(fmt.Sprint("Worker:", i, "launch"))
 			go func(batch int) {
 				batch_channel <- getBatch(ds, batch, batchSize, &dsidx)
 				// epoch.Done()
@@ -71,12 +70,12 @@ func GeneralDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds d
 		}
 		nextWorker := workers
 
-		fmt.Println("Managing workers and worker channel...")
+		// fmt.Println("Managing workers and worker channel...")
 		// watch channel for worker outputs and re-schedule completed workers
 		// TODO workers are overunning we are queueing too many
 		for kb := range batch_channel {
 			// exit from infinite loop
-			fmt.Printf("core b:%v, cache:%v\n", b, bCache)
+			// log.Print(fmt.Sprintf("core b:%v, cache:%v\n", b, bCache))
 			// fmt.Println(kb)
 			if b == num_batches {
 				break
@@ -103,7 +102,7 @@ func GeneralDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds d
 					break
 				}
 				if bCache[b] != nil {
-					fmt.Printf("loop b:%v, cache:%v i:%v\n", b, bCache, i)
+					// fmt.Printf("loop b:%v, cache:%v i:%v\n", b, bCache, i)
 					// take from cache into channel
 					ordered_channel <- *bCache[b]
 					// nillify cache position
@@ -127,11 +126,11 @@ func GeneralDataloader[D dataset.DatasetCompat[L], L dataset.LattigoCompat](ds d
 		// closing channels when this epoch is complete
 		// epoch.Wait()
 		// time.Sleep(10 * time.Second)
-		fmt.Println("closing ordered channel")
+		// fmt.Println("closing ordered channel")
 		// close(batch_channel)
 		close(ordered_channel)
 	}()
-	fmt.Println("Begin Channeling")
+	// fmt.Println("Begin Channeling")
 	return ordered_channel, nil
 }
 
