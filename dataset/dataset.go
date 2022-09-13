@@ -5,21 +5,17 @@ package dataset
 import (
 	"encoding/json"
 
+	dt "gitlab.com/deepcypher/darklantern/darktype"
 	"gitlab.com/deepcypher/darklantern/erray"
 )
 
-// LattigoCompat base data type of dataset compatible objects
-type LattigoCompat interface {
-	~float64 // | ~complex128
-}
-
 // DatasetCompat base data type of dataset objects directly
-type DatasetCompat[L LattigoCompat] interface {
+type DatasetCompat[L dt.LattigoCompat] interface {
 	erray.Erray[L]
 }
 
 // Dataset abstraction and definition of avaliable methods
-type Dataset[D DatasetCompat[L], L LattigoCompat] interface {
+type Dataset[D DatasetCompat[L], L dt.LattigoCompat] interface {
 	Get(i int) (*D, error)
 	Length() (int, error)
 	ToJSON() ([]byte, error)
@@ -27,12 +23,12 @@ type Dataset[D DatasetCompat[L], L LattigoCompat] interface {
 }
 
 // simpleDataset the simplest dataset to show as an example
-type simpleDataset[D DatasetCompat[L], L LattigoCompat] struct {
+type simpleDataset[D DatasetCompat[L], L dt.LattigoCompat] struct {
 	Data *[]D `json:"data"` // slice of individual examples
 }
 
 // NewSimpleDataset initialises a new dataset object with some testable example data
-func NewSimpleDataset[D DatasetCompat[L], L LattigoCompat](data *[]D) Dataset[D, L] {
+func NewSimpleDataset[D DatasetCompat[L], L dt.LattigoCompat](data *[]D) Dataset[D, L] {
 	return &simpleDataset[D, L]{Data: data}
 }
 
