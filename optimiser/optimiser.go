@@ -5,7 +5,7 @@ import (
 )
 
 type Optimiser[L dt.LattigoCompat] interface {
-	Optimise(grads, parms paramMap[L]) error
+	Optimise(grads, parms paramMap[L]) (paramMap[L], error)
 }
 
 // Momentum calculates first or second order momentums given current gradient, desired order, and history of gradients.

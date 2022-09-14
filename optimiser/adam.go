@@ -1,6 +1,8 @@
 package optimiser
 
 import (
+	"fmt"
+
 	dt "gitlab.com/deepcypher/darklantern/darktype"
 )
 
@@ -32,14 +34,30 @@ func NewDefaultAdamOptimiser[L dt.LattigoCompat]() Optimiser[L] {
 }
 
 // Optimise use the ADAM algorithm first a second order moments to calculate the new parameters
-func (a *Adam[L]) Optimise(grads, parms paramMap[L]) error {
+func (a *Adam[L]) Optimise(grads, parms paramMap[L]) (paramMap[L], error) {
 
-	// // first order
-	// Momentum(it, gradient, moment, beta)
-	// // second order
-	// Momentum(it, gradient*gradient, moment, beta)
-	// // mutation
-	return nil
+	nextParms := make(map[string]L)
+	for key, val := range parms {
+		var lastMoment L = 0
+		iterations := 1
+		// scans history for presence of value and counts
+		// the final value will be residual to the next few statements
+		for i := 0; i < len(a.History); i++ {
+			// https://stackoverflow.com/a/2050629
+			if pV, ok := a.History[i][key]; ok {
+				iterations += 1
+				lastMoment = pV
+			}
+		}
+		fmt.Println(key, val, lastMoment, iterations)
+
+		// // first order
+		// Momentum(it, gradient, moment, a.Beta_1))
+		// // second order
+		// Momentum(it, gradient*gradient, moment, beta)
+		// // mutation
+	}
+	return nextParms, nil
 }
 
 // RMSProp or second order moment calculation
