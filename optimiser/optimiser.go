@@ -2,6 +2,8 @@ package optimiser
 
 import (
 	dt "gitlab.com/deepcypher/darklantern/darktype"
+
+	dutl "gitlab.com/deepcypher/darklantern/utils"
 )
 
 type Optimiser[L dt.LattigoCompat] interface {
@@ -16,19 +18,14 @@ type Optimiser[L dt.LattigoCompat] interface {
 // Momentum returns a tuple of (m_hat, m_t) where m_hat is the corrected momentum
 // and m_t is the non corrected momentum.
 // It should be noted gradients passed in towards calculating second order moments must be squared before being passed to this function.
+// First order moment:
+// - m_t = \beta_1 * m_<t-1> + (1 - \beta_1) * g_t
+// - \hat{m}_t = \frac{m_t}{1 - b_1^t}
+// Second order moment:
+// - v_t = \beta_2 * v_<t-1> + (1 - \beta_2) * g_t^2
+// - \hat{v}_t = \frac{v_t}{1 - b_2^t}
 func Momentum[L dt.LattigoCompat](it, gradient, moment, beta L) (L, L) {
-	// first order moment
-	// m_t = \beta_1 * m_<t-1> + (1 - \beta_1) * g_t
-	// \hat{m}_t = \frac{m_t}{1 - b_1^t}
-	// second order moment
-	// v_t = \beta_2 * v_<t-1> + (1 - \beta_2) * g_t^2
-	// \hat{v}_t = \frac{v_t}{1 - b_2^t}
-	var t L = 1
-	// using for loop instead of math power since using generics not float64
-	for i := 0; i < int(it); i++ {
-		t = t * beta
-	}
 	m_t := (beta * moment) + ((1 - beta) * gradient)
-	m_hat := m_t / (1 - t)
+	m_hat := m_t / (1 - dutl.Pow(beta, it))
 	return m_hat, m_t
 }
